@@ -76,7 +76,7 @@ class AzPlayerPlugin implements InterfacePlayer {
     files.forEach((elem){
       filesJson.add(elem.toJson());
     });
-    final bool result = await _channel.invokeMethod('addFileToPlayList', filesJson);
+    final bool result = await _channel.invokeMethod('addFilesToPlayList', filesJson);
     return result;
   }
 

@@ -19,7 +19,7 @@ class File implements InterfaceFile{
   @override
   final String title;
 
-  File(this.currentTime, this.fileStatus, this.fileURL, this.imagePath, this.pk, this.title);
+  File(this.pk, this.fileURL, this.title, this.currentTime, this.fileStatus, this.imagePath);
 
   @override
   Map<String, dynamic> toJson() {
