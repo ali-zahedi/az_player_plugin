@@ -8,13 +8,11 @@
 
 import Foundation
 
-enum FileState: String, CaseIterable{
+enum FileStatus: Int, CaseIterable{
     
-    case readyDownload
-    case downloading
-    case pauseDownload
-    case queue
-    case puase
-    case play
-    case ready
+    case undefined = 0
+    case playing = 1
+    case pause = 2
+    case stop = 3
+    case ready = 4
 }
