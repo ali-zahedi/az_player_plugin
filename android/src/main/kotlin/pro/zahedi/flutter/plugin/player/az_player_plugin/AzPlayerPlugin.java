@@ -10,6 +10,7 @@ import android.os.IBinder;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.flutter.Log;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -103,9 +104,10 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
             }
             case "addFilesToPlayList":{
                 List<File> files = new ArrayList<>();
-                files.add(new File(0, "title 0", 0, "http://dl13.f2m.co/user/shahab/serial/Bard.Of.Blood/S01/Bard.Of.Blood.S01.360p.Trailer.Film2Movie_WS.mp4", "https://cdn.aparnik.com/static/website/img/logo-persian.png", FileStatus.ready));
+                files.add(new File(0, "title 0", 0, "http://dl11.f2m.co/trailer/Crawl.2019.360p.Trailer.Film2Movie_WS.mp4", "https://cdn.aparnik.com/static/website/img/logo-persian.png", FileStatus.ready));
                 files.add(new File(1, "title 0", 0, "http://dl.nex1music.ir/1398/07/06/Saeed%20Foroughi%20-%20Hese%20Romantic%20[128].mp3?time=1569664803&filename=/1398/07/06/Saeed%20Foroughi%20-%20Hese%20Romantic%20[128].mp3", "https://cdn.aparnik.com/static/website/img/logo-persian.png", FileStatus.ready));
                 PlayerService.getInstance().addFilesToList(files);
+                result.success(true);
                 break;
             }
             case "emptyPlayList":{

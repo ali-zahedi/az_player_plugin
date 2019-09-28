@@ -42,6 +42,7 @@ import io.flutter.view.TextureRegistry;
 
 import static com.google.android.exoplayer2.Player.REPEAT_MODE_ALL;
 
+// TODO: attach video screen or get video view
 public class PlayerService {
 
     // Static and Volatile attribute.
@@ -80,15 +81,8 @@ public class PlayerService {
 
     void dispose() {
         this.stop();
-//        Log.i(TAG, "dispose called");
-//        textureEntry.release();
-//        Log.i(TAG, "textureenry released");
-//        eventChannel.setStreamHandler(null);
-//        Log.i(TAG, "event channel stopped");
+        Log.i("Player", "dispose called");
 
-//        if (surface != null) {
-//            surface.release();
-//        }
         if (this.player != null) {
             this.player.release();
         }
@@ -98,8 +92,7 @@ public class PlayerService {
     private Context context;
     private List<File> files = new ArrayList<>();
     private SimpleExoPlayer player;
-    private DataSource.Factory dataSourceFactory;
-    private MediaSource videoSource;
+
     // Method
     // Total Time
     protected double getTotalTime(){
@@ -117,7 +110,7 @@ public class PlayerService {
     }
 
     protected File getCurrentFile(){
-        return new File(0, "title 0", 0, "http://dl13.f2m.co/user/shahab/serial/Bard.Of.Blood/S01/Bard.Of.Blood.S01.360p.Trailer.Film2Movie_WS.mp4", "https://cdn.aparnik.com/static/website/img/logo-persian.png", FileStatus.ready);
+        return new File(0, "title 0", 0, "http://dl11.f2m.co/trailer/Crawl.2019.360p.Trailer.Film2Movie_WS.mp4", "https://cdn.aparnik.com/static/website/img/logo-persian.png", FileStatus.ready);
         // TODO: fix
 //        return null;
     }
@@ -187,14 +180,12 @@ public class PlayerService {
 
     private void setupPlayer() {
 
-//        surface = new Surface(textureEntry.surfaceTexture());
-//        this.player.setVideoSurface(surface);
 
         this.player.addListener(new Player.DefaultEventListener() {
 
             @Override
             public void onPositionDiscontinuity(@Player.DiscontinuityReason int reason) {
-//                Log.i(TAG, "position changed called" + reason);
+                Log.i("Player", "position changed called" + reason);
 
             }
 
@@ -203,19 +194,18 @@ public class PlayerService {
                 super.onPlayerStateChanged(playWhenReady, playbackState);
 
                 if (playbackState == Player.STATE_BUFFERING) {
-//                    event.put("event", "bufferingUpdate");
-
+                    Log.i("player", "bufferingUpdate");
                 } else if (playWhenReady && playbackState == Player.STATE_READY) {
-//                    event.put("event", "play");
+                    Log.i("player", "play");
                 } else if (!playWhenReady && playbackState == Player.STATE_READY) {
-//                    event.put("event", "paused");
+                    Log.i("player", "pause");
                 }
             }
 
             @Override
             public void onPlayerError(final ExoPlaybackException error) {
                 super.onPlayerError(error);
-//                   eventSink.error("VideoError", "Video player had error " + error, null);
+                Log.i("player", "player had error " + error);
                 }
         });
 
