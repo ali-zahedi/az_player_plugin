@@ -186,7 +186,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             children: <Widget>[
               Expanded(
                 flex: 1,
-                child: AzPlayerPlugin().getPlayerView(width: 300, height: 100),
+                child: Container(),//AzPlayerPlugin().getPlayerView(width: 300, height: 100),
               ),
               Expanded(
                 flex: 2,

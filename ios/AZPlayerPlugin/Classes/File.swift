@@ -26,15 +26,6 @@ class File{//: Decodable{
         self.fileStatus = fileStatus
     }
     
-    private enum CodingKeys: String, CodingKey{
-        case pk
-        case title
-        case currentTime
-        case fileURL
-        case image
-        case fileState
-    }
-    
 //    required init(from decoder: Decoder) throws {
     
 //        let container = try decoder.container(keyedBy: CodingKeys.self)

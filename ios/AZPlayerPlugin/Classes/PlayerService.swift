@@ -284,7 +284,7 @@ class PlayerService: NSObject{
             return
         }
         
-        self.changeCurrentTime(secend: (self.currentTime ?? 0) - 15)
+        self.changeCurrentTime(secend: (self.currentTime ?? 0) - 5)
     }
     
     // Play Action
