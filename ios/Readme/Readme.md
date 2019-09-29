@@ -10,3 +10,6 @@
 
 <key>io.flutter.embedded_views_preview</key>
 <true/>
+
+
+3. minimum SDK = 10.0
