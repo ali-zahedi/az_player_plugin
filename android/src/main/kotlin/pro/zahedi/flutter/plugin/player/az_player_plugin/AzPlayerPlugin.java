@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.flutter.Log;
+import io.flutter.plugin.common.MessageCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -30,6 +31,7 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "az_player_plugin");
         channel.setMethodCallHandler(AzPlayerPlugin.getInstance(registrar));
+        registrar.platformViewRegistry().registerViewFactory("PlayerView", new FlutterPlayerViewFactory((MessageCodec<Object>) registrar.messenger()));
     }
 
     private AzPlayerPlugin(Registrar registrar){

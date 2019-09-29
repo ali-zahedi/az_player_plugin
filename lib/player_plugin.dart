@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:az_player_plugin/az_player_plugin.dart';
@@ -52,14 +53,28 @@ class AzPlayerPlugin implements InterfacePlayer {
     creationParams['width'] = w.toString();
     creationParams['height'] = h.toString();
 
-    return SizedBox(
-      width: w,
-      height: h,
-      child: UiKitView(
+    Widget playerView;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      playerView = AndroidView(
         viewType: 'PlayerView',
         creationParams: creationParams,
         creationParamsCodec: StandardMessageCodec(),
-      ),
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      playerView = UiKitView(
+          viewType: 'PlayerView',
+          creationParams: creationParams,
+          creationParamsCodec: StandardMessageCodec(),
+        );
+    }else{
+      playerView = Container();
+    }
+    
+    return SizedBox(
+      width: w,
+      height: h,
+      child: playerView,
     );
   }
 
