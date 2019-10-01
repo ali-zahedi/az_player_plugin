@@ -27,6 +27,10 @@ abstract class InterfacePlayer{
 	Future<bool> pause();
 	
 	Future<bool> stop();
+
+	Future<bool> fastForward();
+
+	Future<bool> fastBackward();
 	
 	Future<bool> addFileToPlayList(InterfaceFile file);
 	

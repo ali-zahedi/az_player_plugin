@@ -144,13 +144,25 @@ class AzPlayerPlugin implements InterfacePlayer {
 
   @override
   Future<bool> removeFromPlayList(InterfaceFile file) async{
-    final bool result = await _channel.invokeMethod('playWithFile', file.toJson());
+    final bool result = await _channel.invokeMethod('removeFromPlayList', file.toJson());
     return result;
   }
 
   @override
   Future<bool> stop() async{
     final bool result = await _channel.invokeMethod('stop');
+    return result;
+  }
+
+  @override
+  Future<bool> fastBackward() async{
+    final bool result = await _channel.invokeMethod('fastBackward');
+    return result;
+  }
+
+  @override
+  Future<bool> fastForward() async{
+    final bool result = await _channel.invokeMethod('fastForward');
     return result;
   }
 }

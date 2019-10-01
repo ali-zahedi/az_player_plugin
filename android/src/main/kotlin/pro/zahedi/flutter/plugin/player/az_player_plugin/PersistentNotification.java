@@ -4,7 +4,9 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.graphics.Bitmap;
+
 import androidx.annotation.Nullable;
+
 import android.support.v4.media.session.MediaSessionCompat;
 
 import com.google.android.exoplayer2.Player;
@@ -48,7 +50,11 @@ class PersistentNotification {
 
         @Override
         public String getCurrentContentTitle(Player player) {
-            return playerService.getCurrentFile().title;
+            File file = playerService.getCurrentFile();
+            if (file != null)
+                return playerService.getCurrentFile().title;
+            else
+                return "";
         }
 
         @Nullable

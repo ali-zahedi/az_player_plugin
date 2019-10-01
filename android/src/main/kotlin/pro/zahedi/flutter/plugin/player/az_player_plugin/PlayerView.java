@@ -5,14 +5,28 @@ import android.view.View;
 import io.flutter.plugin.platform.PlatformView;
 
 public class PlayerView implements PlatformView {
+
+    private static PlayerView instance = null;
+
+    private PlayerView() {
+
+    }
+
+    public static PlayerView getInstance() {
+        if (instance == null)
+            instance = new PlayerView();
+        return instance;
+    }
+
     @Override
     public View getView() {
-        // TODO: return PlayerService.getInstance().getPlayerView()
-        return null;
+
+        return PlayerService.getInstance().getPlayerView();
     }
 
     @Override
     public void dispose() {
-        // TODO: handle dispose Mr. Karamian
+        if (instance != null)
+            instance.dispose();
     }
 }
