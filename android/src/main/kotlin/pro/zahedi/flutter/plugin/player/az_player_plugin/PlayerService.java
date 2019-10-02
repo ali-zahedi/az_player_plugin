@@ -1,18 +1,16 @@
 package pro.zahedi.flutter.plugin.player.az_player_plugin;
 
 import android.content.Context;
-import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
-import android.view.Surface;
+import android.view.SurfaceView;
+import android.view.ViewGroup;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -30,23 +28,16 @@ import com.google.android.exoplayer2.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import io.flutter.plugin.common.EventChannel;
-import io.flutter.plugin.common.MethodChannel;
-import io.flutter.view.TextureRegistry;
-
-import static com.google.android.exoplayer2.Player.REPEAT_MODE_ALL;
-
-// TODO: attach video screen or get video view
 public class PlayerService {
 
     // Static and Volatile attribute.
     private static volatile PlayerService instance = null;
+    private SurfaceView playerView = null;
+    private ConcatenatingMediaSource concatenatingMediaSource;
+
 
     // Private constructor.
     private PlayerService(Context context) {
@@ -54,6 +45,9 @@ public class PlayerService {
         TrackSelector trackSelector = new DefaultTrackSelector();
 
         this.player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        concatenatingMediaSource = new ConcatenatingMediaSource();
+        this.player.prepare(concatenatingMediaSource);
+
         this.setupPlayer();
     }
 
@@ -64,7 +58,7 @@ public class PlayerService {
         if (instance == null && context != null) {
 
             // To provide thread-safe implementation.
-            synchronized(PlayerService.class) {
+            synchronized (PlayerService.class) {
 
                 // Check again as multiple threads can reach above step.
                 if (instance == null) {
@@ -77,6 +71,21 @@ public class PlayerService {
 
     public static PlayerService getInstance() {
         return PlayerService.getInstance(null);
+    }
+
+    public SurfaceView getPlayerView() {
+        if (playerView == null) {
+            playerView = new SurfaceView(context);
+            this.player.setVideoSurfaceView(playerView);
+        }
+        return playerView;
+    }
+
+    public void setPlayerViewSize(double width, double height) {
+        if (playerView == null) getPlayerView();
+
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int) width, (int) height);
+        playerView.setLayoutParams(params);
     }
 
     void dispose() {
@@ -95,84 +104,105 @@ public class PlayerService {
 
     // Method
     // Total Time
-    protected double getTotalTime(){
+    protected double getTotalTime() {
         return this.player.getDuration();
     }
 
     // is Playing
-    protected boolean isPlaying(){
+    protected boolean isPlaying() {
         return player.getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady();
     }
 
     // Current Time
-    protected double getCurrentTime(){
-        return player.getCurrentPosition();
+    protected double getCurrentTime() {
+        return player.getCurrentPosition() / 1000;
     }
 
-    protected File getCurrentFile(){
-        return new File(0, "title 0", 0, "http://dl11.f2m.co/trailer/Crawl.2019.360p.Trailer.Film2Movie_WS.mp4", "https://cdn.aparnik.com/static/website/img/logo-persian.png", FileStatus.ready);
-        // TODO: fix
-//        return null;
+    protected File getCurrentFile() {
+
+        if (files.size() == 0)
+            return null;
+
+        return files.get(this.player.getCurrentPeriodIndex());
     }
 
-    protected void addFileToList(File file){
+    protected void addFileToList(File file) {
         this.files.add(file);
-        this.setPlaylist();
+        this.setPlaylist(Collections.singletonList(file));
     }
 
 
-    protected void addFilesToList(List<File> files){
+    protected void addFilesToList(List<File> files) {
 
         this.files.addAll(files);
-        this.setPlaylist();
+        this.setPlaylist(files);
     }
 
-    protected void changeCurrentTime(double seconds){
-        long time = Math.round(seconds * 1000);
-        this.player.seekTo(time);
+    protected void changeCurrentTime(double seconds) {
+        long time = Math.round(seconds);
+        this.player.seekTo(time * 1000);
     }
 
-    protected void pause(){
+    protected void pause() {
 
         this.player.setPlayWhenReady(false);
     }
 
-    protected void playBackward(){
-
-        // TODO: send play backward to player
+    protected void playBackward() {
+        this.player.previous();
     }
 
-    protected void playNext(){
-
-        // TODO: send play next to player
+    protected void playNext() {
+        this.player.next();
     }
 
-    protected void playWithFile(File file){
+    protected void playWithFile(File file) {
 
-        // TODO: find file to play list and play it.
+        int pos = getFilePosition(file);
+        if (pos != -1) {
+            this.player.seekToDefaultPosition(pos);
+        }
     }
 
-    protected void removeFromPlayList(File file){
+    protected void removeFromPlayList(File file) {
 
-        // TODO: find file and remove from playlist
+        int pos = getFilePosition(file);
+        if (pos != -1) {
+            this.files.remove(pos);
+            concatenatingMediaSource.removeMediaSource(pos);
+        }
     }
 
-    protected void fastForward(){
+    private int getFilePosition(File file) {
+        for (int i = 0; i < this.files.size(); i++) {
+            if (this.files.get(i).pk == file.pk) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    protected void emptyPlayList() {
+        concatenatingMediaSource.clear();
+        files.clear();
+        this.player.prepare(concatenatingMediaSource);
+    }
+
+    protected void fastForward() {
 
         this.changeCurrentTime(this.getCurrentTime() + 15);
     }
 
-    protected void fastBackward(){
+    protected void fastBackward() {
 
         this.changeCurrentTime(this.getCurrentTime() - 5);
     }
 
-    protected void play(){
-
+    protected void play() {
         this.player.setPlayWhenReady(true);
     }
 
-    protected void stop(){
+    protected void stop() {
 
         this.player.stop();
     }
@@ -186,7 +216,6 @@ public class PlayerService {
             @Override
             public void onPositionDiscontinuity(@Player.DiscontinuityReason int reason) {
                 Log.i("Player", "position changed called" + reason);
-
             }
 
             @Override
@@ -206,7 +235,7 @@ public class PlayerService {
             public void onPlayerError(final ExoPlaybackException error) {
                 super.onPlayerError(error);
                 Log.i("player", "player had error " + error);
-                }
+            }
         });
 
 
@@ -216,11 +245,10 @@ public class PlayerService {
         return this.player;
     }
 
-    private void setPlaylist() {
+    private void setPlaylist(List<File> files) {
 
-        ConcatenatingMediaSource concatenatingMediaSource = new ConcatenatingMediaSource();
-        for (int i = 0; i < this.files.size(); i++) {
-            Uri uri = Uri.parse(this.files.get(i).fileURL);
+        for (int i = 0; i < files.size(); i++) {
+            Uri uri = Uri.parse(files.get(i).fileURL);
 
             DataSource.Factory dataSourceFactory;
             if (uri.getScheme().equals("asset") || uri.getScheme().equals("file")) {
@@ -234,7 +262,9 @@ public class PlayerService {
             MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, context);
             concatenatingMediaSource.addMediaSource(mediaSource);
         }
-        this.player.prepare(concatenatingMediaSource);
+        if (files.size() == this.files.size())
+            this.player.prepare(concatenatingMediaSource);
+
     }
 
     private MediaSource buildMediaSource(Uri uri, DataSource.Factory mediaDataSourceFactory, Context context) {
