@@ -23,12 +23,11 @@ public class File {
 
     public static File fromJson(Map<String, Object> model)
     {
-       FileStatus fileStatus = FileStatus.ready;
        return new File((int) model.get("pk"),
                (String) model.get("title"),
                Double.parseDouble(model.get("currentTime").toString()),
                (String) model.get("fileURL"),
                (String) model.get("image"),
-               fileStatus.fromRawValue((Integer) model.get("fileStatus")));
+               FileStatus.fromRawValue((Integer) model.get("fileStatus")));
     }
 }

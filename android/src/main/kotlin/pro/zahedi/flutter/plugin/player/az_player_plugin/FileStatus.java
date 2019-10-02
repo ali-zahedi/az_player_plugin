@@ -4,7 +4,7 @@ public enum  FileStatus {
 
     undefined, playing, pause, stop, ready;
 
-    FileStatus fromRawValue(int rawValue){
+    public static FileStatus fromRawValue(int rawValue){
         switch (rawValue){
             case 0:{
                 return FileStatus.undefined;

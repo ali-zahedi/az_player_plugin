@@ -11,17 +11,13 @@ import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class FlutterPlayerViewFactory extends PlatformViewFactory {
 
-    private final BinaryMessenger messenger;
 
     public FlutterPlayerViewFactory(BinaryMessenger messenger) {
         super(StandardMessageCodec.INSTANCE);
-        this.messenger = messenger;
-
     }
 
     @Override
     public PlatformView create(Context context, int i, Object o) {
-
         HashMap<String, Object> params = (HashMap<String, Object>) o;
         PlayerService.getInstance().setPlayerViewSize(Double.parseDouble(params.get("width").toString()), Double.parseDouble(params.get("height").toString()));
         return PlayerView.getInstance();

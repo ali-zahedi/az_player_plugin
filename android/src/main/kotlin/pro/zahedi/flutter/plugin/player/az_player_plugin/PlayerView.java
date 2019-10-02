@@ -26,7 +26,6 @@ public class PlayerView implements PlatformView {
 
     @Override
     public void dispose() {
-        if (instance != null)
-            instance.dispose();
+        instance = null;
     }
 }

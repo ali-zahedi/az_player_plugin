@@ -83,7 +83,7 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
                     result.success(current.pk);
                 else
                 {
-                    //TODO : if file not found ?
+                    result.success(null);
                 }
                 break;
             }
@@ -165,7 +165,7 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
                 break;
             }
             case "changeTime": {
-                PlayerService.getInstance().changeCurrentTime((Double) call.arguments * 1000);
+                PlayerService.getInstance().changeCurrentTime((Double) call.arguments);
                 result.success(true);
                 break;
             }

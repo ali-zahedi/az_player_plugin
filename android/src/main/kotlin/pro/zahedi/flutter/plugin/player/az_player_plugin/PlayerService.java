@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// TODO: attach video screen or get video view
 public class PlayerService {
 
     // Static and Volatile attribute.
@@ -116,7 +115,7 @@ public class PlayerService {
 
     // Current Time
     protected double getCurrentTime() {
-        return player.getCurrentPosition();
+        return player.getCurrentPosition() / 1000;
     }
 
     protected File getCurrentFile() {
@@ -141,7 +140,7 @@ public class PlayerService {
 
     protected void changeCurrentTime(double seconds) {
         long time = Math.round(seconds);
-        this.player.seekTo(time);
+        this.player.seekTo(time * 1000);
     }
 
     protected void pause() {
@@ -191,12 +190,12 @@ public class PlayerService {
 
     protected void fastForward() {
 
-        this.changeCurrentTime(this.getCurrentTime() + 15000);
+        this.changeCurrentTime(this.getCurrentTime() + 15);
     }
 
     protected void fastBackward() {
 
-        this.changeCurrentTime(this.getCurrentTime() - 5000);
+        this.changeCurrentTime(this.getCurrentTime() - 5);
     }
 
     protected void play() {
