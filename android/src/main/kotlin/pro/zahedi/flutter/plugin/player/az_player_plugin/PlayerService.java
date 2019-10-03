@@ -159,9 +159,9 @@ public class PlayerService {
     protected void playWithFile(File file) {
 
         int pos = getFilePosition(file);
-        if (pos != -1) {
-            this.player.seekToDefaultPosition(pos);
-        }
+        this.player.seekToDefaultPosition(pos);
+        this.play();
+
     }
 
     protected void removeFromPlayList(File file) {
@@ -179,7 +179,8 @@ public class PlayerService {
                 return i;
             }
         }
-        return -1;
+        addFileToList(file);
+        return getFilePosition(file);
     }
 
     protected void emptyPlayList() {
