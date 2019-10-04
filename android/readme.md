@@ -1,7 +1,7 @@
 
 add android/app/AndroidManifest.xml
 <service
-    android:name="cpro.zahedi.flutter.plugin.player.az_player_plugin.AudioService"
+    android:name="pro.zahedi.flutter.plugin.player.az_player_plugin.AudioService"
     android:enabled="true"
     android:exported="false">
 </service>
