@@ -193,3 +193,16 @@ or
 15. change time to special second:
 
 > ``AZPlayerPlugin.AzPlayerPlugin().changeTime(17);``
+
+
+You must read every one seconds to update your player, like (slider, timer and etc to update time).
+
+#### TODO:
+
+- [ ] get play list
+
+- [ ] fast forward in iOS
+
+- [ ] fast backward in iOS
+
+- [ ] handle update client. like call back or interval for update timer, slider, play/pause button in framework.
