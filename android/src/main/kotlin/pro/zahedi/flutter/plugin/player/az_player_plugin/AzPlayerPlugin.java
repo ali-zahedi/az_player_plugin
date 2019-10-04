@@ -6,9 +6,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.flutter.Log;
 import io.flutter.plugin.common.MessageCodec;
@@ -20,7 +21,9 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.common.PluginRegistry.ViewDestroyListener;
 import io.flutter.view.FlutterNativeView;
 
-/** AzPlayerPlugin */
+/**
+ * AzPlayerPlugin
+ */
 public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
     // Static and Volatile attribute.
     private static volatile AzPlayerPlugin instance = null;
@@ -31,11 +34,12 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "az_player_plugin");
         channel.setMethodCallHandler(AzPlayerPlugin.getInstance(registrar));
-        registrar.platformViewRegistry().registerViewFactory("PlayerView", new FlutterPlayerViewFactory((MessageCodec<Object>) registrar.messenger()));
+        registrar.platformViewRegistry().registerViewFactory("PlayerView", new FlutterPlayerViewFactory(registrar.messenger()));
     }
 
-    private AzPlayerPlugin(Registrar registrar){
+    private AzPlayerPlugin(Registrar registrar) {
         this.registrar = registrar;
+        PlayerService.getInstance(registrar.context());
         this.bindService();
     }
 
@@ -46,7 +50,7 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
         if (instance == null) {
 
             // To provide thread-safe implementation.
-            synchronized(AzPlayerPlugin.class) {
+            synchronized (AzPlayerPlugin.class) {
 
                 // Check again as multiple threads can reach above step.
                 if (instance == null) {
@@ -60,82 +64,109 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
     @Override
     public void onMethodCall(MethodCall call, Result result) {
         switch (call.method) {
-            case "duration":{
+            case "duration": {
 
                 result.success(PlayerService.getInstance().getTotalTime());
                 break;
             }
-            case "currentTime":{
+            case "currentTime": {
                 result.success(PlayerService.getInstance().getCurrentTime());
                 break;
             }
-            case "secondsLeft":{
+            case "secondsLeft": {
                 result.success(PlayerService.getInstance().getTotalTime() - PlayerService.getInstance().getCurrentTime());
                 break;
             }
-            case "currentFile":{
-
+            case "currentFile": {
+                File current = PlayerService.getInstance().getCurrentFile();
+                if (current != null)
+                    result.success(current.pk);
+                else
+                {
+                    result.success(null);
+                }
                 break;
             }
-            case "isPlaying":{
+            case "isPlaying": {
                 result.success(PlayerService.getInstance().isPlaying());
                 break;
             }
-            case "play":{
+            case "play": {
                 PlayerService.getInstance().play();
                 result.success(true);
                 break;
             }
-            case "playWithFile":{
-
+            case "playWithFile": {
+                Map<String, Object> filesJson = (Map<String, Object>) call.arguments;
+                PlayerService.getInstance().playWithFile(File.fromJson(filesJson));
+                result.success(true);
                 break;
             }
-            case "pause":{
+            case "pause": {
                 PlayerService.getInstance().pause();
                 result.success(true);
                 break;
             }
-            case "stop":{
+            case "stop": {
                 PlayerService.getInstance().stop();
                 result.success(true);
                 break;
             }
-            case "addFileToPlayList":{
-
+            case "addFileToPlayList": {
+                Map<String, Object> filesJson = (Map<String, Object>) call.arguments;
+                PlayerService.getInstance().addFileToList(File.fromJson(filesJson));
+                result.success(true);
                 break;
             }
-            case "addFilesToPlayList":{
+            case "addFilesToPlayList": {
                 List<File> files = new ArrayList<>();
-                files.add(new File(0, "title 0", 0, "http://dl11.f2m.co/trailer/Crawl.2019.360p.Trailer.Film2Movie_WS.mp4", "https://cdn.aparnik.com/static/website/img/logo-persian.png", FileStatus.ready));
-                files.add(new File(1, "title 0", 0, "http://dl.nex1music.ir/1398/07/06/Saeed%20Foroughi%20-%20Hese%20Romantic%20[128].mp3?time=1569664803&filename=/1398/07/06/Saeed%20Foroughi%20-%20Hese%20Romantic%20[128].mp3", "https://cdn.aparnik.com/static/website/img/logo-persian.png", FileStatus.ready));
+                List<Map<String, Object>> filesJson = (List<Map<String, Object>>) call.arguments;
+                for (int i = 0; i < filesJson.size(); i++) {
+                    files.add(File.fromJson(filesJson.get(i)));
+                }
                 PlayerService.getInstance().addFilesToList(files);
                 result.success(true);
                 break;
             }
-            case "emptyPlayList":{
-
+            case "emptyPlayList": {
+                PlayerService.getInstance().emptyPlayList();
+                result.success(true);
                 break;
             }
-            case "removeFromPlayList":{
-
+            case "removeFromPlayList": {
+                Map<String, Object> filesJson = (Map<String, Object>) call.arguments;
+                PlayerService.getInstance().removeFromPlayList(File.fromJson(filesJson));
+                result.success(true);
                 break;
             }
-            case "getPlayList":{
+            case "getPlayList": {
 
+                //TODO : ?
                 break;
             }
-            case "next":{
+            case "next": {
                 PlayerService.getInstance().playNext();
                 result.success(true);
                 break;
             }
-            case "previous":{
+            case "previous": {
                 PlayerService.getInstance().playBackward();
                 result.success(true);
                 break;
             }
-            case "changeTime":{
-
+            case "fastForward": {
+                PlayerService.getInstance().fastForward();
+                result.success(true);
+                break;
+            }
+            case "fastBackward": {
+                PlayerService.getInstance().fastBackward();
+                result.success(true);
+                break;
+            }
+            case "changeTime": {
+                PlayerService.getInstance().changeCurrentTime((Double) call.arguments);
+                result.success(true);
                 break;
             }
         }
@@ -156,7 +187,7 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
     }
 
     private void unBoundService() {
-        if (audioServiceBinder != null){
+        if (audioServiceBinder != null) {
             audioServiceBinder.destroyAllPlayers();
             registrar.context().unbindService(serviceConnection);
 
