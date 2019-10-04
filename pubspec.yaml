@@ -1,8 +1,11 @@
 name: az_player_plugin
-description: A player plugin
-version: 0.0.1
-author:
-homepage:
+description: A Flutter player plugin
+version: 0.0.2
+authors: [
+  Ali ZahediGol <ali.zahedigol@gmail.com>,
+  Masoud Karamian <masoudk.2000@gmail.com>
+]
+homepage: https://github.com/ali-zahedi/az_player_plugin
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

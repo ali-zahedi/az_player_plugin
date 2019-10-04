@@ -67,7 +67,7 @@ class PlayerService: NSObject{
     }
     
     // Current Time
-    fileprivate var currentTime: Double?{
+    var currentTime: Double?{
         let value = self.player?.currentItem?.currentTime().seconds
         return value
     }
@@ -90,7 +90,7 @@ class PlayerService: NSObject{
 //            self.updateUI()
 
                 
-                oldValue?.fileState = .ready
+            oldValue?.fileStatus = .ready
                 oldValue?.currentTime = 0.0
     
         }
@@ -160,6 +160,16 @@ class PlayerService: NSObject{
         self.files = files
     }
     
+    func addFileToList(file: File){
+        
+        self.files.append(contentsOf: [file])
+    }
+    
+    
+    func addFilesToList(files: [File]){
+        
+        self.files.append(contentsOf: files)
+    }
     // Change Current Time
     func changeCurrentTime(secend: Double, timeScale: Int=1000){
         
@@ -185,7 +195,7 @@ class PlayerService: NSObject{
         if player.isPlaying{
             
             self.currentFile?.currentTime = player.currentItem?.currentTime().seconds ?? 0
-            self.currentFile?.fileState = .puase
+            self.currentFile?.fileStatus = .pause
             self.delegate?.pauseFile(self.currentFile)
             player.pause()
         }
@@ -226,11 +236,34 @@ class PlayerService: NSObject{
         }else{
             
             self.removePeriodicTimeObserver()
-            self.currentFile?.fileState = .ready
+            self.currentFile?.fileStatus = .ready
             self.currentFile?.currentTime = 0
         }
         
         self.play(withIndex: playIndex)
+    }
+    
+    
+    func playWithFile(file: File){
+        
+        for (key, value) in self.files.enumerated(){
+            if value.pk == file.pk{
+                self.play(withIndex: key)
+            }else{
+                
+                self.addFileToList(file: file)
+                self.play(withIndex: self.files.count - 1)
+            }
+        }
+        
+    }
+    
+    func removeFromPlayList(file: File){
+        for (key, value) in self.files.enumerated(){
+            if value.pk == file.pk{
+                self.files.remove(at: key)
+            }
+        }
     }
     
     // fastforward
@@ -251,7 +284,7 @@ class PlayerService: NSObject{
             return
         }
         
-        self.changeCurrentTime(secend: (self.currentTime ?? 0) - 15)
+        self.changeCurrentTime(secend: (self.currentTime ?? 0) - 5)
     }
     
     // Play Action
@@ -318,7 +351,7 @@ class PlayerService: NSObject{
         self.removePeriodicTimeObserver()
         player?.pause()
         player?.seek(to: CMTime.zero)
-        self.currentFile?.fileState = .ready
+        self.currentFile?.fileStatus = .ready
         self.currentFile = nil
     }
     
@@ -329,7 +362,7 @@ class PlayerService: NSObject{
             return 
         }
         
-        if file.fileState == .puase{
+        if file.fileStatus == .pause{
             
             self.player?.play()
         }else{
@@ -345,7 +378,7 @@ class PlayerService: NSObject{
         }
         
         self.currentFile = file
-        file.fileState = .play
+        file.fileStatus = .playing
         self.delegate?.playFile(file)
         self.addPeriodicTimeObserver()
         self.updateAlbum()
@@ -397,7 +430,7 @@ class PlayerService: NSObject{
             return MPRemoteCommandHandlerStatus.noSuchContent
         }
         
-        if track.fileState == .puase{
+        if track.fileStatus == FileStatus.pause{
             
             self.player?.play()
             self.changeCurrentTime(secend: sender.positionTime, timeScale: 1000000)

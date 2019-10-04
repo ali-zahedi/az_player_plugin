@@ -9,20 +9,31 @@
 import Foundation
 import UIKit
 
-class File{
+class File{//: Decodable{
     var pk: Int
     var title: String
     var currentTime: Double
     var fileURL: URL?
     var image: UIImage?
-    var fileState: FileState = .readyDownload
+    var fileStatus: FileStatus = .ready
     
-    init(pk: Int, title: String, fileURL: URL?, currentTime: Double, fileState: FileState, image: UIImage?) {
+    init(pk: Int, title: String, fileURL: URL?, currentTime: Double, fileStatus: FileStatus, image: UIImage?) {
         self.pk = pk
         self.title = title
         self.fileURL = fileURL
         self.image = image
         self.currentTime = currentTime
-        self.fileState = fileState
+        self.fileStatus = fileStatus
     }
+    
+//    required init(from decoder: Decoder) throws {
+    
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//
+//        // title
+//        if let title = try? container.decode(String.self, forKey: .title){
+//
+//        }
+//
+//    }
 }

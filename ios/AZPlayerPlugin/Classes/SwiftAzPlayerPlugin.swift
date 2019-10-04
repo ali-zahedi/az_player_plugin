@@ -11,32 +11,130 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    if (call.method == "getPlatformVersion") {
-        guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            return
-        }
-        var files: [File] = []
+    
+    if (call.method == "duration") {
         
-        files.append(File(pk: 2, title: "0 file", fileURL: URL(string: "http://dl11.f2m.co/trailer/Crawl.2019.360p.Trailer.Film2Movie_WS.mp4"), currentTime: 0, fileState: .ready, image: nil))
+        result(PlayerService.shared.totalTime)
+    }else if(call.method == "currentTime"){
         
-        files.append(File(pk: 0, title: "0 file", fileURL: URL(string: "http://dls.tabanmusic.com/music/1398/07/01/Mehrad-Jam-Khialet-Rahat.mp3"), currentTime: 0, fileState: .ready, image: nil))
+        result(PlayerService.shared.currentTime)
+    }else if(call.method == "secondsLeft") {
         
-        files.append(File(pk: 1, title: "0.1 file", fileURL:URL(string: "http://dls.tabanmusic.com/music/1398/06/26/Shahab-Mozaffari-Setayesh.mp3"), currentTime: 0, fileState: .ready, image: nil))
+        let totalTime: Double = PlayerService.shared.totalTime ?? 0
+        let currentTime: Double = PlayerService.shared.currentTime ?? 0
+        result( totalTime - currentTime)
+    }else if(call.method == "currentFile") {
+    
+        result(PlayerService.shared.currentFile?.pk)
+    }else if(call.method == "isPlaying") {
         
-        for n in 1...5 {
-            var url: URL = documentsPath
-            url.appendPathComponent("\(n).mp3")
-            let file: File = File(pk: n, title: "\(n) file", fileURL: url, currentTime: 0, fileState: .ready, image: nil)
-            files.append(file);
-        }
+        result(PlayerService.shared.isPlaying)
+    }else if(call.method == "play") {
         
-        PlayerService.shared.configure(files: files)
         PlayerService.shared.playAction()
-        //        PlayerService.shared.playNext()
+        result(true)
+    }else if(call.method == "playWithFile") {
         
-        result("iOS casdf" + UIDevice.current.systemVersion)
-    }else{
-        result("iOSadsf " + UIDevice.current.systemVersion)
+        let file: File? = self.convertToFile(args: call.arguments)
+        if ( file != nil ){
+            PlayerService.shared.playWithFile(file: file!)
+            result(true)
+        }else{
+            result(false)
+        }
+    }else if(call.method == "pause") {
+        
+        PlayerService.shared.pause()
+        result(true)
+    }else if(call.method == "stop") {
+        
+        PlayerService.shared.stop(self)
+        result(true)
+    }else if(call.method == "addFileToPlayList") {
+        
+        let file: File? = self.convertToFile(args: call.arguments)
+        if ( file != nil ){
+            PlayerService.shared.addFileToList(file: file!)
+            result(true)
+        }else{
+            result(false)
+        }
+    }else if(call.method == "addFilesToPlayList") {
+        
+        let files: [File] = self.convertToFiles(args: call.arguments ?? nil)
+        
+        PlayerService.shared.addFilesToList(files: files)
+        result(true)
+        
+    }else if(call.method == "emptyPlayList") {
+        
+        PlayerService.shared.stop(self)
+        PlayerService.shared.configure(files: [])
+    }else if(call.method == "removeFromPlayList") {
+        
+        let file: File? = self.convertToFile(args: call.arguments)
+        if ( file != nil ){
+            PlayerService.shared.removeFromPlayList(file: file!)
+            result(true)
+        }else{
+            result(false)
+        }
+    }else if(call.method == "getPlayList") {
+        
+        // TODO:
+    }else if(call.method == "next") {
+        
+        PlayerService.shared.playNext()
+        result(true)
+    }else if(call.method == "previous") {
+        
+        PlayerService.shared.playBackward()
+        result(true)
+    }else if(call.method == "changeTime") {
+        
+        let time: Double? = call.arguments as? Double
+        if ( time != nil ){
+            PlayerService.shared.changeCurrentTime(secend: time!)
+            result(true)
+        }else{
+            result(false)
+        }
     }
   }
+    
+    func convertToFile(args: Any?) -> File?{
+        guard let argsDict = args as? Dictionary<String, Any>
+        else{
+            return nil
+        }
+        
+        guard         let pk = argsDict["pk"] as? Int,
+            let title = argsDict["title"] as? String,
+            let currentTime = argsDict["currentTime"] as? Double,
+            let fileURL = argsDict["fileURL"] as? String,
+            let image = argsDict["imagePath"] as? String,
+            let fileStatus = argsDict["fileStatus"] as? Int
+            else{
+                return nil
+        }
+        //        TODO: image address
+        return File(pk: pk, title: title, fileURL: URL(string: fileURL), currentTime: currentTime, fileStatus: FileStatus(rawValue: fileStatus) ?? .ready, image: UIImage())
+    }
+    
+    func convertToFiles(args: Any?) -> [File]{
+        var files: [File] = []
+        guard let argsArray = args as? Array<Any>
+            else{
+                
+            return files
+        }
+        
+        for value in argsArray{
+            let file = self.convertToFile(args: value)
+            if(file != nil){
+            files.append(file!)
+            }
+        }
+        return files
+    }
 }
