@@ -1,3 +1,7 @@
+## 0.0.6
+
+* Get current file
+
 ## 0.0.5
 
 * Update readme
