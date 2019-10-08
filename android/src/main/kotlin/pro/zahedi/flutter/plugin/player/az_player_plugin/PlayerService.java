@@ -4,8 +4,11 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -36,6 +39,7 @@ public class PlayerService {
     // Static and Volatile attribute.
     private static volatile PlayerService instance = null;
     private SurfaceView playerView = null;
+    private ImageView audioView = null;
     private ConcatenatingMediaSource concatenatingMediaSource;
 
 
@@ -73,7 +77,14 @@ public class PlayerService {
         return PlayerService.getInstance(null);
     }
 
-    public SurfaceView getPlayerView() {
+    public View getPlayerView() {
+
+        File currentFile = getCurrentFile();
+        // TODO : check file type
+        return getVideoView();
+    }
+
+    private View getVideoView() {
         if (playerView == null) {
             playerView = new SurfaceView(context);
             this.player.setVideoSurfaceView(playerView);
@@ -81,11 +92,22 @@ public class PlayerService {
         return playerView;
     }
 
+    private View getAudioView(File currentFile) {
+        if (audioView == null) {
+            audioView = new ImageView(context);
+        }
+        Glide.with(context).load(currentFile.image).into(audioView);
+        return audioView;
+    }
+
     public void setPlayerViewSize(double width, double height) {
-        if (playerView == null) getPlayerView();
+        if (playerView == null && audioView == null) getPlayerView();
 
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int) width, (int) height);
-        playerView.setLayoutParams(params);
+        if (playerView != null)
+            playerView.setLayoutParams(params);
+        if (audioView != null)
+            audioView.setLayoutParams(params);
     }
 
     void dispose() {
@@ -105,7 +127,8 @@ public class PlayerService {
     // Method
     // Total Time
     protected double getTotalTime() {
-        return this.player.getDuration();
+        double duration = this.player.getDuration() / 1000;
+        return duration < 0 ? 0 : duration;
     }
 
     // is Playing
@@ -158,7 +181,10 @@ public class PlayerService {
 
     protected void playWithFile(File file) {
 
+        if (getCurrentFile().pk == file.pk && isPlaying()) return;
+
         int pos = getFilePosition(file);
+        this.player.prepare(concatenatingMediaSource);
         this.player.seekToDefaultPosition(pos);
         this.play();
 
@@ -263,9 +289,8 @@ public class PlayerService {
             MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, context);
             concatenatingMediaSource.addMediaSource(mediaSource);
         }
-        if (files.size() == this.files.size())
+        if (!isPlaying())
             this.player.prepare(concatenatingMediaSource);
-
     }
 
     private MediaSource buildMediaSource(Uri uri, DataSource.Factory mediaDataSourceFactory, Context context) {
