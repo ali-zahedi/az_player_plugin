@@ -1,24 +1,33 @@
 import 'dart:async';
+import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:az_player_plugin/az_player_plugin.dart';
 
 class AzPlayerPlugin implements InterfacePlayer {
-  static const AzPlayerPlugin _instance = const AzPlayerPlugin._();
+  static AzPlayerPlugin _instance = AzPlayerPlugin._();
   final MethodChannel _channel = const MethodChannel('az_player_plugin');
 
-  const AzPlayerPlugin._();
+  AzPlayerPlugin._();
 
   factory AzPlayerPlugin() {
     return AzPlayerPlugin._instance;
   }
 
+  LinkedHashSet<File> _files = new LinkedHashSet<File>();
+
   @override
   Future<InterfaceFile> get currentFile async{
     final num pk = await _channel.invokeMethod('currentFile');
-    throw UnimplementedError();
-//    return result;
+    File file;
+    for(var i = 0; i< this._files.length; i++){
+      if(this._files.elementAt(i).pk == pk){
+        file = this._files.elementAt(i);
+        break;
+      }
+    }
+    return file;
   }
 
   @override
@@ -82,6 +91,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   Future<bool> addFileToPlayList(InterfaceFile file) async {
   
     final bool result = await _channel.invokeMethod('addFileToPlayList', file.toJson());
+    this._files.add(file);
     return result;
   }
 
@@ -90,8 +100,9 @@ class AzPlayerPlugin implements InterfacePlayer {
     List<Map<String, dynamic>> filesJson = [];
     files.forEach((elem){
       filesJson.add(elem.toJson());
+      this._files.add(elem);
     });
-    final bool result = await _channel.invokeMethod('addFilesToPlayList', filesJson);
+    final bool result = await _channel.invokeMethod('addFilesToPlayList', filesJson);;
     return result;
   }
 
@@ -104,12 +115,13 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> emptyPlayList() async{
     final bool result = await _channel.invokeMethod('emptyPlayList');
+    this._files.clear();
     return result;
   }
 
   @override
-  Future<List<InterfaceFile>> getPlayList() {
-    throw UnimplementedError();
+  Future<List<InterfaceFile>> getPlayList() async{
+    return this._files.toList();
   }
 
   @override
@@ -145,6 +157,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> removeFromPlayList(InterfaceFile file) async{
     final bool result = await _channel.invokeMethod('removeFromPlayList', file.toJson());
+    this._files.removeWhere((value) => value.pk == file.pk);
     return result;
   }
 
