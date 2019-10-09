@@ -38,9 +38,11 @@ public class PlayerService {
 
     // Static and Volatile attribute.
     private static volatile PlayerService instance = null;
-    private SurfaceView playerView = null;
-    private ImageView audioView = null;
+    private View playerView = null;
     private ConcatenatingMediaSource concatenatingMediaSource;
+
+    private double width=0;
+    private double height=0;
 
 
     // Private constructor.
@@ -78,36 +80,31 @@ public class PlayerService {
     }
 
     public View getPlayerView() {
-
-        File currentFile = getCurrentFile();
-        // TODO : check file type
-        return getVideoView();
-    }
-
-    private View getVideoView() {
         if (playerView == null) {
-            playerView = new SurfaceView(context);
-            this.player.setVideoSurfaceView(playerView);
+            initialView();
         }
         return playerView;
     }
 
-    private View getAudioView(File currentFile) {
-        if (audioView == null) {
-            audioView = new ImageView(context);
+    private void initialView() {
+
+        File currentFile = getCurrentFile();
+        if (this.player.getVideoFormat() == null) {
+            playerView = new ImageView(context);
+            ((ImageView) playerView).setScaleType(ImageView.ScaleType.FIT_CENTER);
+            Glide.with(context).load(currentFile.image).into((ImageView) playerView);
+        } else {
+            playerView = new SurfaceView(context);
+            this.player.setVideoSurfaceView((SurfaceView) playerView);
         }
-        Glide.with(context).load(currentFile.image).into(audioView);
-        return audioView;
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int) width, (int) height);
+        playerView.setLayoutParams(params);
     }
 
     public void setPlayerViewSize(double width, double height) {
-        if (playerView == null && audioView == null) getPlayerView();
-
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int) width, (int) height);
-        if (playerView != null)
-            playerView.setLayoutParams(params);
-        if (audioView != null)
-            audioView.setLayoutParams(params);
+        this.width = width;
+        this.height = height;
+        initialView();
     }
 
     void dispose() {
@@ -252,8 +249,10 @@ public class PlayerService {
                 if (playbackState == Player.STATE_BUFFERING) {
                     Log.i("player", "bufferingUpdate");
                 } else if (playWhenReady && playbackState == Player.STATE_READY) {
+                    initialView();
                     Log.i("player", "play");
                 } else if (!playWhenReady && playbackState == Player.STATE_READY) {
+                    initialView();
                     Log.i("player", "pause");
                 }
             }
