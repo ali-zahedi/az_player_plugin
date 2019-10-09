@@ -41,8 +41,8 @@ public class PlayerService {
     private View playerView = null;
     private ConcatenatingMediaSource concatenatingMediaSource;
 
-    private double width=0;
-    private double height=0;
+    private double width = 0;
+    private double height = 0;
 
 
     // Private constructor.
@@ -92,7 +92,8 @@ public class PlayerService {
         if (this.player.getVideoFormat() == null) {
             playerView = new ImageView(context);
             ((ImageView) playerView).setScaleType(ImageView.ScaleType.FIT_CENTER);
-            Glide.with(context).load(currentFile.image).into((ImageView) playerView);
+            if (currentFile != null && currentFile.image != null)
+                Glide.with(context).load(currentFile.image).into((ImageView) playerView);
         } else {
             playerView = new SurfaceView(context);
             this.player.setVideoSurfaceView((SurfaceView) playerView);
