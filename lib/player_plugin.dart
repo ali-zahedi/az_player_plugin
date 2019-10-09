@@ -178,4 +178,10 @@ class AzPlayerPlugin implements InterfacePlayer {
     final bool result = await _channel.invokeMethod('fastForward');
     return result;
   }
+
+  @override
+  Future<bool> setImagePlaceHolder(String path) async{
+    final bool result = await _channel.invokeMethod('setImagePlaceHolder', path);
+    return result;
+  }
 }

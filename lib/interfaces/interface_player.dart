@@ -49,6 +49,8 @@ abstract class InterfacePlayer{
 	
 	Future<bool> changeTime(num toSecond);
 	
+	Future<bool> setImagePlaceHolder(String path);
+	
 	// می توانید با استفاده از این فانکشن از تغییرات آگاه شوید.
 //	void setCallBack(PlayerCallBack callBack);
 	

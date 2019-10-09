@@ -99,7 +99,22 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
         }else{
             result(false)
         }
-    }
+    }else if(call.method == "fastForward") {
+
+             PlayerService.shared.fastForward()
+             result(true)
+    }else if(call.method == "fastBackward") {
+
+          PlayerService.shared.fastBackward()
+          result(true)
+    }else if(call.method == "setImagePlaceHolder") {
+         guard let imagePath: String = call.arguments as? String else{
+            result(false)
+            return
+        }
+        PlayerService.shared.setImagePlaceHolder(imagePath: imagePath)
+        result(true)
+     }
   }
     
     func convertToFile(args: Any?) -> File?{

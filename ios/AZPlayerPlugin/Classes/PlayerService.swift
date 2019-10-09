@@ -104,7 +104,17 @@ class PlayerService: NSObject{
     fileprivate let session = AVAudioSession.sharedInstance()
     fileprivate let commandCenter = MPRemoteCommandCenter.shared()
     fileprivate let playingInfo = MPNowPlayingInfoCenter.default()
-    
+    fileprivate var imagePlaceHolderPath: String?{
+        didSet{
+            guard let imagePath = self.imagePlaceHolderPath else {
+                self.imagePlaceHolder = nil
+                return
+            }
+            
+            self.imagePlaceHolder = UIImage(named: (imagePath))
+        }
+    }
+    fileprivate var imagePlaceHolder: UIImage?
     
     // Mark: Init
     private override init() {
@@ -483,11 +493,23 @@ class PlayerService: NSObject{
     func updatePlayerView(){
         self.playerLayer?.frame = PlayerView.view.bounds
         self.playerLayer?.videoGravity = AVLayerVideoGravity.resize
-        if let playerLayer = self.playerLayer {
-            
-            PlayerView.view.layer.insertSublayer(playerLayer, at:0)
+        
+        if self.player?.currentItem?.asset.tracks(withMediaType: AVMediaType.video).count != 0{
+            if let playerLayer = self.playerLayer {
+                
+                PlayerView.view.layer.insertSublayer(playerLayer, at:0)
+            }
+        }else{
+            let imageView = UIImageView(image: self.imagePlaceHolder)
+            imageView.contentMode = .scaleAspectFit
+            PlayerView.view.addSubview(imageView)
+            PlayerView.view.bringSubviewToFront(imageView)
         }
         
+    }
+    
+    func setImagePlaceHolder(imagePath: String){
+        self.imagePlaceHolderPath = imagePath
     }
 }
 

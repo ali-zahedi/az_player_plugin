@@ -1,3 +1,9 @@
+## 0.0.7
+
+* Add placeholder for audio file
+
+* Add fast forward and fast backward in iOS version
+
 ## 0.0.6
 
 * Get current file
