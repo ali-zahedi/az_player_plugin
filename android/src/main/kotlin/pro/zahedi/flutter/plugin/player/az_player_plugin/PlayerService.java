@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -38,7 +39,7 @@ public class PlayerService {
 
     // Static and Volatile attribute.
     private static volatile PlayerService instance = null;
-    private View playerView = null;
+    private FrameLayout playerView = null;
     private ConcatenatingMediaSource concatenatingMediaSource;
 
     private double width = 0;
@@ -90,13 +91,24 @@ public class PlayerService {
 
         File currentFile = getCurrentFile();
         if (this.player.getVideoFormat() == null) {
-            playerView = new ImageView(context);
-            ((ImageView) playerView).setScaleType(ImageView.ScaleType.FIT_CENTER);
+            ImageView imageView = new ImageView(context);
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             if (currentFile != null && currentFile.image != null)
-                Glide.with(context).load(currentFile.image).into((ImageView) playerView);
+                Glide.with(context).load(currentFile.image).into(imageView);
+
+            playerView.removeAllViews();
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
+            imageView.setLayoutParams(params);
+            playerView.addView(imageView);
+            playerView.invalidate();
         } else {
-            playerView = new SurfaceView(context);
-            this.player.setVideoSurfaceView((SurfaceView) playerView);
+            SurfaceView surfaceView = new SurfaceView(context);
+            this.player.setVideoSurfaceView(surfaceView);
+            playerView.removeAllViews();
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
+            surfaceView.setLayoutParams(params);
+            playerView.addView(surfaceView);
+            playerView.invalidate();
         }
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int) width, (int) height);
         playerView.setLayoutParams(params);
