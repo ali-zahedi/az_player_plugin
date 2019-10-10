@@ -88,6 +88,10 @@ public class PlayerService {
     }
 
     private void initialView() {
+        if (playerView == null) {
+            playerView = new FrameLayout(context);
+        }
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
         File currentFile = getCurrentFile();
         if (this.player.getVideoFormat() == null) {
@@ -97,7 +101,6 @@ public class PlayerService {
                 Glide.with(context).load(currentFile.image).into(imageView);
 
             playerView.removeAllViews();
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
             imageView.setLayoutParams(params);
             playerView.addView(imageView);
             playerView.invalidate();
@@ -105,13 +108,12 @@ public class PlayerService {
             SurfaceView surfaceView = new SurfaceView(context);
             this.player.setVideoSurfaceView(surfaceView);
             playerView.removeAllViews();
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
             surfaceView.setLayoutParams(params);
             playerView.addView(surfaceView);
             playerView.invalidate();
         }
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int) width, (int) height);
-        playerView.setLayoutParams(params);
+        FrameLayout.LayoutParams viewParams =  new FrameLayout.LayoutParams((int) width, (int) height);
+        playerView.setLayoutParams(viewParams);
     }
 
     public void setPlayerViewSize(double width, double height) {
