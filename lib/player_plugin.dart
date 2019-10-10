@@ -144,6 +144,7 @@ class AzPlayerPlugin implements InterfacePlayer {
 
   @override
   Future<bool> playWithFile(InterfaceFile file) async {
+    this._files.add(file);
     final bool result = await _channel.invokeMethod('playWithFile', file.toJson());
     return result;
   }
