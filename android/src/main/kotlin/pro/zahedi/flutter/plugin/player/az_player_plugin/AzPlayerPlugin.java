@@ -165,7 +165,7 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
                 break;
             }
             case "changeTime": {
-                PlayerService.getInstance().changeCurrentTime((Double) call.arguments);
+                PlayerService.getInstance().changeCurrentTime(Double.parseDouble(call.arguments.toString()));
                 result.success(true);
                 break;
             }
