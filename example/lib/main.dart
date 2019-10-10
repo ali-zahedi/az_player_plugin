@@ -114,13 +114,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
       AZPlayerPlugin.FileStatus.ready,
       "https://cdn.aparnik.com/static/website/img/logo-persian.png",
     );
-
-    files.add(file);
+    
 
     AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(files);
-
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
-      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().play()}");
+//      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().play()}");
+      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().playWithFile(file)}");
     });
 
     seconds += delay;
@@ -129,6 +128,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
       print("duration: ${await AZPlayerPlugin.AzPlayerPlugin().duration}");
       print("change time: ${await AZPlayerPlugin.AzPlayerPlugin().changeTime(10)}");
       print("currentTime: ${await AZPlayerPlugin.AzPlayerPlugin().currentTime}");
+      AZPlayerPlugin.InterfaceFile file = await AZPlayerPlugin.AzPlayerPlugin().currentFile;
+      print("currentFile: ${file.title}");
     });
 
     seconds += delay;

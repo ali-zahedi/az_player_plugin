@@ -259,13 +259,12 @@ class PlayerService: NSObject{
         for (key, value) in self.files.enumerated(){
             if value.pk == file.pk{
                 self.play(withIndex: key)
-            }else{
-                
-                self.addFileToList(file: file)
-                self.play(withIndex: self.files.count - 1)
+                return
             }
         }
         
+        self.addFileToList(file: file)
+        self.play(withIndex: self.files.count - 1)
     }
     
     func removeFromPlayList(file: File){
