@@ -127,11 +127,11 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
             let title = argsDict["title"] as? String,
             let currentTime = argsDict["currentTime"] as? Double,
             let fileURL = argsDict["fileURL"] as? String,
-            let image = argsDict["imagePath"] as? String,
             let fileStatus = argsDict["fileStatus"] as? Int
             else{
                 return nil
         }
+        let imagePath: String? = argsDict["imagePath"] as? String,
         //        TODO: image address
         return File(pk: pk, title: title, fileURL: URL(string: fileURL), currentTime: currentTime, fileStatus: FileStatus(rawValue: fileStatus) ?? .ready, image: UIImage())
     }
