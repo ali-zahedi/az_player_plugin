@@ -500,7 +500,8 @@ class PlayerService: NSObject{
             self.getImage { (image) in
                 self.coverImageView.image = image
             }
-            self.coverImageView.contentMode = .scaleAspectFit
+            self.coverImageView.contentMode = .scaleAspectFill
+            self.coverImageView.clipsToBounds = true
             self.coverImageView.frame = PlayerView.view.bounds
             PlayerView.view.addSubview(self.coverImageView)
             PlayerView.view.bringSubviewToFront(self.coverImageView)
