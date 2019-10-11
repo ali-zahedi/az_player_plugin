@@ -2,8 +2,11 @@ import Flutter
 import UIKit
 
 public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
-  public static func register(with registrar: FlutterPluginRegistrar) {
+    fileprivate static var registrar: FlutterPluginRegistrar? = nil
+  
+    public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "az_player_plugin", binaryMessenger: registrar.messenger())
+        SwiftAzPlayerPlugin.registrar = registrar
     let instance = SwiftAzPlayerPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
     let viewFactory = FlutterPlayerViewFactory()
@@ -108,10 +111,11 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
           PlayerService.shared.fastBackward()
           result(true)
     }else if(call.method == "setImagePlaceHolder") {
-         guard let imagePath: String = call.arguments as? String else{
+        guard let imgPath: String = call.arguments as? String, let key: String = SwiftAzPlayerPlugin.registrar?.lookupKey(forAsset: imgPath), let imagePath: String = Bundle.main.path(forResource: key, ofType: nil) else{
             result(false)
             return
         }
+        
         PlayerService.shared.setImagePlaceHolder(imagePath: imagePath)
         result(true)
      }
@@ -133,7 +137,7 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
         }
         let imagePath: String? = argsDict["imagePath"] as? String
         //        TODO: image address
-        return File(pk: pk, title: title, fileURL: URL(string: fileURL), currentTime: currentTime, fileStatus: FileStatus(rawValue: fileStatus) ?? .ready, image: UIImage())
+        return File(pk: pk, title: title, fileURL: URL(string: fileURL), currentTime: currentTime, fileStatus: FileStatus(rawValue: fileStatus) ?? .ready, image: URL(string: imagePath ?? ""))
     }
     
     func convertToFiles(args: Any?) -> [File]{

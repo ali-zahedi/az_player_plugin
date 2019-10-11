@@ -115,6 +115,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
       "https://cdn.aparnik.com/static/website/img/logo-persian.png",
     );
     
+    AZPlayerPlugin.AzPlayerPlugin().setImagePlaceHolder('assets/logo.png');
 
     AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(files);
     Future.delayed(Duration(seconds: seconds)).then((elem) async {

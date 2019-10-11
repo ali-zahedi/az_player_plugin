@@ -14,10 +14,10 @@ class File{//: Decodable{
     var title: String
     var currentTime: Double
     var fileURL: URL?
-    var image: UIImage?
+    var image: URL?
     var fileStatus: FileStatus = .ready
     
-    init(pk: Int, title: String, fileURL: URL?, currentTime: Double, fileStatus: FileStatus, image: UIImage?) {
+    init(pk: Int, title: String, fileURL: URL?, currentTime: Double, fileStatus: FileStatus, image: URL?) {
         self.pk = pk
         self.title = title
         self.fileURL = fileURL

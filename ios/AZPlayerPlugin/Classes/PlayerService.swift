@@ -11,6 +11,7 @@ import UIKit
 import AVKit
 import MediaPlayer
 import AVFoundation
+import SDWebImage
 
 enum LoopType: String, CaseIterable{
     
@@ -104,17 +105,7 @@ class PlayerService: NSObject{
     fileprivate let session = AVAudioSession.sharedInstance()
     fileprivate let commandCenter = MPRemoteCommandCenter.shared()
     fileprivate let playingInfo = MPNowPlayingInfoCenter.default()
-    fileprivate var imagePlaceHolderPath: String?{
-        didSet{
-            guard let imagePath = self.imagePlaceHolderPath else {
-                self.imagePlaceHolder = nil
-                return
-            }
-            
-            self.imagePlaceHolder = UIImage(named: (imagePath))
-        }
-    }
-    fileprivate var imagePlaceHolder: UIImage?
+    fileprivate var imagePlaceHolderPath: URL?
     
     // Mark: Init
     private override init() {
@@ -461,23 +452,27 @@ class PlayerService: NSObject{
         
         func album(title: String){
             // album detail
-            let albumArt = MPMediaItemArtwork(boundsSize: CGSize(width: 150, height: 150)) { (cgSize) -> UIImage in
+            self.getImage(complationHandler: { (image) in
+                let albumArt = MPMediaItemArtwork(boundsSize: CGSize(width: 150, height: 150)) { (cgSize) -> UIImage in
+                    let image: UIImage = image ?? UIImage()
+                    
+                    return image
+                }
                 
-                let image = self.currentFile?.image ?? UIImage()
+                let albumDict = [
+                    MPMediaItemPropertyTitle: title,
+                    MPMediaItemPropertyArtwork: albumArt,
+                    MPMediaItemPropertyPlaybackDuration: self.player?.currentItem?.asset.duration.seconds ?? 0,
+                    MPNowPlayingInfoPropertyElapsedPlaybackTime: "0",
+                    MPMediaItemPropertyArtist: Bundle.main.infoDictionary?["CFBundleDisplayName"] as! String,
+                    ] as [String : Any]
                 
-                return image
-            }
+                self.playingInfo.nowPlayingInfo = albumDict
+                self.playingInfo.nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(CMTime(value: CMTimeValue(Int(self.currentTime ?? 0)), timescale: CMTimeScale(1)))
+                
+            })
             
-            let albumDict = [
-                MPMediaItemPropertyTitle: title,
-                MPMediaItemPropertyArtwork: albumArt,
-                MPMediaItemPropertyPlaybackDuration: self.player?.currentItem?.asset.duration.seconds ?? 0,
-                MPNowPlayingInfoPropertyElapsedPlaybackTime: "0",
-                MPMediaItemPropertyArtist: Bundle.main.infoDictionary?["CFBundleDisplayName"] as! String,
-                ] as [String : Any]
             
-            self.playingInfo.nowPlayingInfo = albumDict
-            self.playingInfo.nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(CMTime(value: CMTimeValue(Int(self.currentTime ?? 0)), timescale: CMTimeScale(1)))
         }
         
         let title = track.title
@@ -490,6 +485,9 @@ class PlayerService: NSObject{
     }
     
     func updatePlayerView(){
+        PlayerView.view.subviews.forEach { (view) in
+            view.removeFromSuperview()
+        }
         self.playerLayer?.frame = PlayerView.view.bounds
         self.playerLayer?.videoGravity = AVLayerVideoGravity.resize
         
@@ -499,8 +497,12 @@ class PlayerService: NSObject{
                 PlayerView.view.layer.insertSublayer(playerLayer, at:0)
             }
         }else{
-            let imageView = UIImageView(image: self.imagePlaceHolder)
+            let imageView = UIImageView.init()
+            self.getImage { (image) in
+                imageView.image = image
+            }
             imageView.contentMode = .scaleAspectFit
+            imageView.frame = PlayerView.view.bounds
             PlayerView.view.addSubview(imageView)
             PlayerView.view.bringSubviewToFront(imageView)
         }
@@ -508,7 +510,46 @@ class PlayerService: NSObject{
     }
     
     func setImagePlaceHolder(imagePath: String){
-        self.imagePlaceHolderPath = imagePath
+        self.imagePlaceHolderPath = URL(string: imagePath)
+    }
+    
+    fileprivate func getImage(complationHandler: @escaping(_ image: UIImage?)->()) {
+        // load local image
+        if self.currentFile?.image?.isFileURL ?? false{
+            if let imageURL = self.currentFile?.image {
+                do {
+                    let imageData = try Data(contentsOf: imageURL)
+                    if let image = UIImage(data: imageData){
+                        complationHandler(image)
+                    }
+                }catch {
+                    print("Not able to load image")
+                }
+            }
+        }
+        
+        let imagePath: String = self.currentFile?.image?.absoluteString ??  ""
+        let image: UIImage
+        if let img: UIImage = SDImageCache.shared.imageFromDiskCache(forKey: imagePath) {
+            
+            image = img
+        }else if let img: UIImage = SDImageCache.shared.imageFromMemoryCache(forKey: imagePath) {
+            
+            image = img
+        }else{
+            SDWebImageDownloader.init().downloadImage(with: self.currentFile?.image) { (image, data, error, isSuccess) in
+                if isSuccess{
+                    complationHandler(image)
+                }
+            }
+            // load local place holder
+            if let imageURL = self.imagePlaceHolderPath{
+                image = UIImage(imageLiteralResourceName: imageURL.absoluteString)
+            }else{
+                image = UIImage()
+            }
+        }
+        complationHandler(image)
     }
 }
 
