@@ -1,6 +1,7 @@
 package pro.zahedi.flutter.plugin.player.az_player_plugin;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -10,6 +11,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -44,6 +46,8 @@ public class PlayerService {
 
     private double width = 0;
     private double height = 0;
+
+    private String imagePlaceHolderPath;
 
 
     // Private constructor.
@@ -87,6 +91,10 @@ public class PlayerService {
         return playerView;
     }
 
+    public void setImagePlaceHolderPath(String path) {
+        imagePlaceHolderPath = path;
+    }
+
     private void initialView() {
         if (playerView == null) {
             playerView = new FrameLayout(context);
@@ -97,8 +105,14 @@ public class PlayerService {
         if (this.player.getVideoFormat() == null) {
             ImageView imageView = new ImageView(context);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            if (currentFile != null && currentFile.image != null)
-                Glide.with(context).load(currentFile.image).into(imageView);
+
+            Drawable d = null;
+            try {
+                d = Drawable.createFromStream(context.getAssets().open(imagePlaceHolderPath), null);
+            } catch (Exception e) {
+            }
+            RequestOptions option = new RequestOptions().placeholder(d).error(d);
+            Glide.with(context).setDefaultRequestOptions(option).load(currentFile.image).into(imageView);
 
             playerView.removeAllViews();
             imageView.setLayoutParams(params);
@@ -112,7 +126,7 @@ public class PlayerService {
             playerView.addView(surfaceView);
             playerView.invalidate();
         }
-        FrameLayout.LayoutParams viewParams =  new FrameLayout.LayoutParams((int) width, (int) height);
+        FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
         playerView.setLayoutParams(viewParams);
     }
 
@@ -193,7 +207,8 @@ public class PlayerService {
 
     protected void playWithFile(File file) {
 
-        if (getCurrentFile().pk == file.pk && isPlaying()) return;
+        File currentFile = getCurrentFile();
+        if (currentFile != null && currentFile.pk == file.pk && isPlaying()) return;
 
         int pos = getFilePosition(file);
         this.player.prepare(concatenatingMediaSource);
