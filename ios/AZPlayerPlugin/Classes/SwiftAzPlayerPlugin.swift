@@ -136,7 +136,6 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
                 return nil
         }
         let imagePath: String? = argsDict["imagePath"] as? String
-        //        TODO: image address
         return File(pk: pk, title: title, fileURL: URL(string: fileURL), currentTime: currentTime, fileStatus: FileStatus(rawValue: fileStatus) ?? .ready, image: URL(string: imagePath ?? ""))
     }
     

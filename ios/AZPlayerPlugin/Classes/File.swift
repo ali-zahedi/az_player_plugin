@@ -14,7 +14,7 @@ class File{//: Decodable{
     var title: String
     var currentTime: Double
     var fileURL: URL?
-    var image: URL?
+    fileprivate(set) var image: URL?
     var fileStatus: FileStatus = .ready
     
     init(pk: Int, title: String, fileURL: URL?, currentTime: Double, fileStatus: FileStatus, image: URL?) {

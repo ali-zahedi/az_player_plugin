@@ -83,7 +83,7 @@ class PlayerService: NSObject{
             return self._currentFile
         }
     }
-    
+    fileprivate let coverImageView: UIImageView = UIImageView.init()
     fileprivate var _currentFile: File? {
         
         didSet{
@@ -372,7 +372,6 @@ class PlayerService: NSObject{
             
             self.player = AVPlayer(url: fileURL)
             self.playerLayer = AVPlayerLayer(player: player)
-            self.updatePlayerView()
             NotificationCenter.default.addObserver(self, selector: #selector(reachTheEndOfTheVideo(_:)), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: self.player?.currentItem)
             self.player?.play()
         }
@@ -381,6 +380,7 @@ class PlayerService: NSObject{
         file.fileStatus = .playing
         self.delegate?.playFile(file)
         self.addPeriodicTimeObserver()
+        self.updatePlayerView()
         self.updateAlbum()
     }
     
@@ -497,14 +497,13 @@ class PlayerService: NSObject{
                 PlayerView.view.layer.insertSublayer(playerLayer, at:0)
             }
         }else{
-            let imageView = UIImageView.init()
             self.getImage { (image) in
-                imageView.image = image
+                self.coverImageView.image = image
             }
-            imageView.contentMode = .scaleAspectFit
-            imageView.frame = PlayerView.view.bounds
-            PlayerView.view.addSubview(imageView)
-            PlayerView.view.bringSubviewToFront(imageView)
+            self.coverImageView.contentMode = .scaleAspectFit
+            self.coverImageView.frame = PlayerView.view.bounds
+            PlayerView.view.addSubview(self.coverImageView)
+            PlayerView.view.bringSubviewToFront(self.coverImageView)
         }
         
     }
@@ -529,27 +528,24 @@ class PlayerService: NSObject{
         }
         
         let imagePath: String = self.currentFile?.image?.absoluteString ??  ""
-        let image: UIImage
         if let img: UIImage = SDImageCache.shared.imageFromDiskCache(forKey: imagePath) {
             
-            image = img
+            complationHandler(img)
+            return
         }else if let img: UIImage = SDImageCache.shared.imageFromMemoryCache(forKey: imagePath) {
             
-            image = img
-        }else{
-            SDWebImageDownloader.init().downloadImage(with: self.currentFile?.image) { (image, data, error, isSuccess) in
-                if isSuccess{
-                    complationHandler(image)
-                }
-            }
-            // load local place holder
-            if let imageURL = self.imagePlaceHolderPath{
-                image = UIImage(imageLiteralResourceName: imageURL.absoluteString)
-            }else{
-                image = UIImage()
+            complationHandler(img)
+            return
+        }
+        let image = UIImage(imageLiteralResourceName: self.imagePlaceHolderPath?.absoluteString ?? "")
+        complationHandler(image)
+        SDWebImageManager.init().loadImage(with: self.currentFile?.image, options: .continueInBackground, context: nil, progress: nil) { (img, data, error, cacheType, isSuccess, url) in
+            if isSuccess && img != nil{
+                complationHandler(img)
+                self.updateAlbum()
             }
         }
-        complationHandler(image)
+        
     }
 }
 
