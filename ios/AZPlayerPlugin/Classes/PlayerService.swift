@@ -152,6 +152,9 @@ class PlayerService: NSObject{
         // disable
         self.commandCenter.skipBackwardCommand.isEnabled = false
         self.commandCenter.skipForwardCommand.isEnabled = false
+        
+        self.coverImageView.contentMode = .scaleAspectFill
+        self.coverImageView.clipsToBounds = true
     }
     
     // Mark: Function
@@ -500,8 +503,6 @@ class PlayerService: NSObject{
             self.getImage { (image) in
                 self.coverImageView.image = image
             }
-            self.coverImageView.contentMode = .scaleAspectFill
-            self.coverImageView.clipsToBounds = true
             self.coverImageView.frame = PlayerView.view.bounds
             PlayerView.view.addSubview(self.coverImageView)
             PlayerView.view.bringSubviewToFront(self.coverImageView)
