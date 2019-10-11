@@ -11,6 +11,7 @@ import UIKit
 import AVKit
 import MediaPlayer
 import AVFoundation
+import SDWebImage
 
 enum LoopType: String, CaseIterable{
     
@@ -82,7 +83,7 @@ class PlayerService: NSObject{
             return self._currentFile
         }
     }
-    
+    fileprivate let coverImageView: UIImageView = UIImageView.init()
     fileprivate var _currentFile: File? {
         
         didSet{
@@ -104,17 +105,7 @@ class PlayerService: NSObject{
     fileprivate let session = AVAudioSession.sharedInstance()
     fileprivate let commandCenter = MPRemoteCommandCenter.shared()
     fileprivate let playingInfo = MPNowPlayingInfoCenter.default()
-    fileprivate var imagePlaceHolderPath: String?{
-        didSet{
-            guard let imagePath = self.imagePlaceHolderPath else {
-                self.imagePlaceHolder = nil
-                return
-            }
-            
-            self.imagePlaceHolder = UIImage(named: (imagePath))
-        }
-    }
-    fileprivate var imagePlaceHolder: UIImage?
+    fileprivate var imagePlaceHolderPath: URL?
     
     // Mark: Init
     private override init() {
@@ -259,13 +250,12 @@ class PlayerService: NSObject{
         for (key, value) in self.files.enumerated(){
             if value.pk == file.pk{
                 self.play(withIndex: key)
-            }else{
-                
-                self.addFileToList(file: file)
-                self.play(withIndex: self.files.count - 1)
+                return
             }
         }
         
+        self.addFileToList(file: file)
+        self.play(withIndex: self.files.count - 1)
     }
     
     func removeFromPlayList(file: File){
@@ -382,7 +372,6 @@ class PlayerService: NSObject{
             
             self.player = AVPlayer(url: fileURL)
             self.playerLayer = AVPlayerLayer(player: player)
-            self.updatePlayerView()
             NotificationCenter.default.addObserver(self, selector: #selector(reachTheEndOfTheVideo(_:)), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: self.player?.currentItem)
             self.player?.play()
         }
@@ -391,6 +380,7 @@ class PlayerService: NSObject{
         file.fileStatus = .playing
         self.delegate?.playFile(file)
         self.addPeriodicTimeObserver()
+        self.updatePlayerView()
         self.updateAlbum()
     }
     
@@ -462,23 +452,27 @@ class PlayerService: NSObject{
         
         func album(title: String){
             // album detail
-            let albumArt = MPMediaItemArtwork(boundsSize: CGSize(width: 150, height: 150)) { (cgSize) -> UIImage in
+            self.getImage(complationHandler: { (image) in
+                let albumArt = MPMediaItemArtwork(boundsSize: CGSize(width: 150, height: 150)) { (cgSize) -> UIImage in
+                    let image: UIImage = image ?? UIImage()
+                    
+                    return image
+                }
                 
-                let image = self.currentFile?.image ?? UIImage()
+                let albumDict = [
+                    MPMediaItemPropertyTitle: title,
+                    MPMediaItemPropertyArtwork: albumArt,
+                    MPMediaItemPropertyPlaybackDuration: self.player?.currentItem?.asset.duration.seconds ?? 0,
+                    MPNowPlayingInfoPropertyElapsedPlaybackTime: "0",
+                    MPMediaItemPropertyArtist: Bundle.main.infoDictionary?["CFBundleDisplayName"] as! String,
+                    ] as [String : Any]
                 
-                return image
-            }
+                self.playingInfo.nowPlayingInfo = albumDict
+                self.playingInfo.nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(CMTime(value: CMTimeValue(Int(self.currentTime ?? 0)), timescale: CMTimeScale(1)))
+                
+            })
             
-            let albumDict = [
-                MPMediaItemPropertyTitle: title,
-                MPMediaItemPropertyArtwork: albumArt,
-                MPMediaItemPropertyPlaybackDuration: self.player?.currentItem?.asset.duration.seconds ?? 0,
-                MPNowPlayingInfoPropertyElapsedPlaybackTime: "0",
-                MPMediaItemPropertyArtist: Bundle.main.infoDictionary?["CFBundleDisplayName"] as! String,
-                ] as [String : Any]
             
-            self.playingInfo.nowPlayingInfo = albumDict
-            self.playingInfo.nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(CMTime(value: CMTimeValue(Int(self.currentTime ?? 0)), timescale: CMTimeScale(1)))
         }
         
         let title = track.title
@@ -491,6 +485,9 @@ class PlayerService: NSObject{
     }
     
     func updatePlayerView(){
+        PlayerView.view.subviews.forEach { (view) in
+            view.removeFromSuperview()
+        }
         self.playerLayer?.frame = PlayerView.view.bounds
         self.playerLayer?.videoGravity = AVLayerVideoGravity.resize
         
@@ -500,16 +497,55 @@ class PlayerService: NSObject{
                 PlayerView.view.layer.insertSublayer(playerLayer, at:0)
             }
         }else{
-            let imageView = UIImageView(image: self.imagePlaceHolder)
-            imageView.contentMode = .scaleAspectFit
-            PlayerView.view.addSubview(imageView)
-            PlayerView.view.bringSubviewToFront(imageView)
+            self.getImage { (image) in
+                self.coverImageView.image = image
+            }
+            self.coverImageView.contentMode = .scaleAspectFit
+            self.coverImageView.frame = PlayerView.view.bounds
+            PlayerView.view.addSubview(self.coverImageView)
+            PlayerView.view.bringSubviewToFront(self.coverImageView)
         }
         
     }
     
     func setImagePlaceHolder(imagePath: String){
-        self.imagePlaceHolderPath = imagePath
+        self.imagePlaceHolderPath = URL(string: imagePath)
+    }
+    
+    fileprivate func getImage(complationHandler: @escaping(_ image: UIImage?)->()) {
+        // load local image
+        if self.currentFile?.image?.isFileURL ?? false{
+            if let imageURL = self.currentFile?.image {
+                do {
+                    let imageData = try Data(contentsOf: imageURL)
+                    if let image = UIImage(data: imageData){
+                        complationHandler(image)
+                    }
+                }catch {
+                    print("Not able to load image")
+                }
+            }
+        }
+        
+        let imagePath: String = self.currentFile?.image?.absoluteString ??  ""
+        if let img: UIImage = SDImageCache.shared.imageFromDiskCache(forKey: imagePath) {
+            
+            complationHandler(img)
+            return
+        }else if let img: UIImage = SDImageCache.shared.imageFromMemoryCache(forKey: imagePath) {
+            
+            complationHandler(img)
+            return
+        }
+        let image = UIImage(imageLiteralResourceName: self.imagePlaceHolderPath?.absoluteString ?? "")
+        complationHandler(image)
+        SDWebImageManager.init().loadImage(with: self.currentFile?.image, options: .continueInBackground, context: nil, progress: nil) { (img, data, error, cacheType, isSuccess, url) in
+            if isSuccess && img != nil{
+                complationHandler(img)
+                self.updateAlbum()
+            }
+        }
+        
     }
 }
 

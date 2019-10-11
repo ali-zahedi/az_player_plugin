@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.os.IBinder;
 
 import java.lang.reflect.Type;
@@ -81,8 +83,7 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
                 File current = PlayerService.getInstance().getCurrentFile();
                 if (current != null)
                     result.success(current.pk);
-                else
-                {
+                else {
                     result.success(null);
                 }
                 break;
@@ -139,6 +140,19 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
                 result.success(true);
                 break;
             }
+            case "setImagePlaceHolder": {
+                String filePath = call.arguments.toString();
+
+                try {
+                    String key = registrar.lookupKeyForAsset(filePath);
+                    PlayerService.getInstance().setImagePlaceHolderPath(key);
+                    result.success(true);
+                } catch (Exception e) {
+                    result.success(false);
+                }
+
+                break;
+            }
             case "getPlayList": {
 
                 //TODO : ?
@@ -165,7 +179,7 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
                 break;
             }
             case "changeTime": {
-                PlayerService.getInstance().changeCurrentTime((Double) call.arguments);
+                PlayerService.getInstance().changeCurrentTime(Double.parseDouble(call.arguments.toString()));
                 result.success(true);
                 break;
             }

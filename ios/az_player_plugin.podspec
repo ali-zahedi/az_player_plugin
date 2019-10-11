@@ -16,6 +16,7 @@ A player plugin
   s.source_files = 'AZPlayerPlugin/Classes/**/*'
   s.public_header_files = 'AZPlayerPlugin/Classes/**/*.h'
   s.dependency 'Flutter'
+  s.dependency 'SDWebImage'
 
   s.ios.deployment_target = '10.0'
 

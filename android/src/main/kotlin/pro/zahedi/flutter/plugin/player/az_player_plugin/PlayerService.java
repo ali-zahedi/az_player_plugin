@@ -1,14 +1,17 @@
 package pro.zahedi.flutter.plugin.player.az_player_plugin;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -38,11 +41,13 @@ public class PlayerService {
 
     // Static and Volatile attribute.
     private static volatile PlayerService instance = null;
-    private View playerView = null;
+    private FrameLayout playerView = null;
     private ConcatenatingMediaSource concatenatingMediaSource;
 
     private double width = 0;
     private double height = 0;
+
+    private String imagePlaceHolderPath;
 
 
     // Private constructor.
@@ -86,20 +91,43 @@ public class PlayerService {
         return playerView;
     }
 
+    public void setImagePlaceHolderPath(String path) {
+        imagePlaceHolderPath = path;
+    }
+
     private void initialView() {
+        if (playerView == null) {
+            playerView = new FrameLayout(context);
+        }
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
         File currentFile = getCurrentFile();
         if (this.player.getVideoFormat() == null) {
-            playerView = new ImageView(context);
-            ((ImageView) playerView).setScaleType(ImageView.ScaleType.FIT_CENTER);
-            if (currentFile != null && currentFile.image != null)
-                Glide.with(context).load(currentFile.image).into((ImageView) playerView);
+            ImageView imageView = new ImageView(context);
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+            Drawable d = null;
+            try {
+                d = Drawable.createFromStream(context.getAssets().open(imagePlaceHolderPath), null);
+            } catch (Exception e) {
+            }
+            RequestOptions option = new RequestOptions().placeholder(d).error(d);
+            Glide.with(context).setDefaultRequestOptions(option).load(currentFile.image).into(imageView);
+
+            playerView.removeAllViews();
+            imageView.setLayoutParams(params);
+            playerView.addView(imageView);
+            playerView.invalidate();
         } else {
-            playerView = new SurfaceView(context);
-            this.player.setVideoSurfaceView((SurfaceView) playerView);
+            SurfaceView surfaceView = new SurfaceView(context);
+            this.player.setVideoSurfaceView(surfaceView);
+            playerView.removeAllViews();
+            surfaceView.setLayoutParams(params);
+            playerView.addView(surfaceView);
+            playerView.invalidate();
         }
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int) width, (int) height);
-        playerView.setLayoutParams(params);
+        FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
+        playerView.setLayoutParams(viewParams);
     }
 
     public void setPlayerViewSize(double width, double height) {
@@ -179,7 +207,8 @@ public class PlayerService {
 
     protected void playWithFile(File file) {
 
-        if (getCurrentFile().pk == file.pk && isPlaying()) return;
+        File currentFile = getCurrentFile();
+        if (currentFile != null && currentFile.pk == file.pk && isPlaying()) return;
 
         int pos = getFilePosition(file);
         this.player.prepare(concatenatingMediaSource);

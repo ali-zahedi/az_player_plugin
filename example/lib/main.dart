@@ -79,7 +79,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
       "title 0",
       0,
       AZPlayerPlugin.FileStatus.ready,
-      "https://cdn.aparnik.com/static/website/img/logo-persian.png",
+      "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
     );
 
     files.add(file);
@@ -90,7 +90,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
       "title 1",
       10,
       AZPlayerPlugin.FileStatus.ready,
-      "https://cdn.aparnik.com/static/website/img/logo-persian.png",
+      "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
     );
 
     files.add(file);
@@ -101,7 +101,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
       "title 2",
       20,
       AZPlayerPlugin.FileStatus.ready,
-      "https://cdn.aparnik.com/static/website/img/logo-persian.png",
+      "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
     );
 
     files.add(file);
@@ -112,15 +112,15 @@ class _PlayerScreenState extends State<PlayerScreen> {
       "title 3",
       100,
       AZPlayerPlugin.FileStatus.ready,
-      "https://cdn.aparnik.com/static/website/img/logo-persian.png",
+      "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
     );
-
-    files.add(file);
+    
+    AZPlayerPlugin.AzPlayerPlugin().setImagePlaceHolder('assets/logo.png');
 
     AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(files);
-
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
-      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().play()}");
+//      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().play()}");
+      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().playWithFile(file)}");
     });
 
     seconds += delay;
@@ -129,6 +129,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
       print("duration: ${await AZPlayerPlugin.AzPlayerPlugin().duration}");
       print("change time: ${await AZPlayerPlugin.AzPlayerPlugin().changeTime(10)}");
       print("currentTime: ${await AZPlayerPlugin.AzPlayerPlugin().currentTime}");
+      AZPlayerPlugin.InterfaceFile file = await AZPlayerPlugin.AzPlayerPlugin().currentFile;
+      print("currentFile: ${file.title}");
     });
 
     seconds += delay;
