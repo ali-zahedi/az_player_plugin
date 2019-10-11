@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -296,8 +297,6 @@ public class PlayerService {
                 Log.i("player", "player had error " + error);
             }
         });
-
-
     }
 
     public SimpleExoPlayer getPlayer() {
@@ -307,10 +306,13 @@ public class PlayerService {
     private void setPlaylist(List<File> files) {
 
         for (int i = 0; i < files.size(); i++) {
-            Uri uri = Uri.parse(files.get(i).fileURL);
+            String fileUrl = files.get(i).fileURL;
+            Uri uri = Uri.parse(fileUrl);
 
             DataSource.Factory dataSourceFactory;
-            if (uri.getScheme().equals("asset") || uri.getScheme().equals("file")) {
+            boolean isInternetUrl = URLUtil.isHttpsUrl(fileUrl) || URLUtil.isHttpUrl(fileUrl);
+
+            if (!isInternetUrl) {
                 dataSourceFactory = new DefaultDataSourceFactory(context, "ExoPlayer");
             } else {
                 dataSourceFactory = new DefaultHttpDataSourceFactory("ExoPlayer", null,
