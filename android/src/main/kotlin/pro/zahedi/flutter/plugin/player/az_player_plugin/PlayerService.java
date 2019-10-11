@@ -1,8 +1,10 @@
 package pro.zahedi.flutter.plugin.player.az_player_plugin;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.CalendarContract;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
@@ -98,6 +100,7 @@ public class PlayerService {
     private void initialView() {
         if (playerView == null) {
             playerView = new FrameLayout(context);
+            playerView.setBackgroundColor(Color.BLACK);
         }
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
