@@ -11,7 +11,7 @@ class File implements InterfaceFile{
   final String fileURL;
 
   @override
-  final String imagePath;
+  final String image;
 
   @override
   final int pk;
@@ -19,7 +19,7 @@ class File implements InterfaceFile{
   @override
   final String title;
 
-  File(this.pk, this.fileURL, this.title, this.currentTime, this.fileStatus, this.imagePath);
+  File(this.pk, this.fileURL, this.title, this.currentTime, this.fileStatus, this.image);
 
   @override
   Map<String, dynamic> toJson() {
@@ -28,7 +28,7 @@ class File implements InterfaceFile{
     map['currentTime'] = currentTime;
     map['fileStatus'] = fileStatus.value;
     map['fileURL'] = fileURL;
-    map['imagePath'] = imagePath;
+    map['image'] = image;
     map['pk'] = pk;
     map['title'] = title;
     

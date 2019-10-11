@@ -1,15 +1,20 @@
 package pro.zahedi.flutter.plugin.player.az_player_plugin;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.CalendarContract;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -44,6 +49,8 @@ public class PlayerService {
 
     private double width = 0;
     private double height = 0;
+
+    private String imagePlaceHolderPath;
 
 
     // Private constructor.
@@ -87,9 +94,14 @@ public class PlayerService {
         return playerView;
     }
 
+    public void setImagePlaceHolderPath(String path) {
+        imagePlaceHolderPath = path;
+    }
+
     private void initialView() {
         if (playerView == null) {
             playerView = new FrameLayout(context);
+            playerView.setBackgroundColor(Color.BLACK);
         }
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
@@ -97,8 +109,14 @@ public class PlayerService {
         if (this.player.getVideoFormat() == null) {
             ImageView imageView = new ImageView(context);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            if (currentFile != null && currentFile.image != null)
-                Glide.with(context).load(currentFile.image).into(imageView);
+
+            Drawable d = null;
+            try {
+                d = Drawable.createFromStream(context.getAssets().open(imagePlaceHolderPath), null);
+            } catch (Exception e) {
+            }
+            RequestOptions option = new RequestOptions().placeholder(d).error(d);
+            Glide.with(context).setDefaultRequestOptions(option).load(currentFile.image).into(imageView);
 
             playerView.removeAllViews();
             imageView.setLayoutParams(params);
@@ -112,7 +130,7 @@ public class PlayerService {
             playerView.addView(surfaceView);
             playerView.invalidate();
         }
-        FrameLayout.LayoutParams viewParams =  new FrameLayout.LayoutParams((int) width, (int) height);
+        FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
         playerView.setLayoutParams(viewParams);
     }
 
@@ -193,7 +211,8 @@ public class PlayerService {
 
     protected void playWithFile(File file) {
 
-        if (getCurrentFile().pk == file.pk && isPlaying()) return;
+        File currentFile = getCurrentFile();
+        if (currentFile != null && currentFile.pk == file.pk && isPlaying()) return;
 
         int pos = getFilePosition(file);
         this.player.prepare(concatenatingMediaSource);
@@ -278,8 +297,6 @@ public class PlayerService {
                 Log.i("player", "player had error " + error);
             }
         });
-
-
     }
 
     public SimpleExoPlayer getPlayer() {
@@ -289,10 +306,13 @@ public class PlayerService {
     private void setPlaylist(List<File> files) {
 
         for (int i = 0; i < files.size(); i++) {
-            Uri uri = Uri.parse(files.get(i).fileURL);
+            String fileUrl = files.get(i).fileURL;
+            Uri uri = Uri.parse(fileUrl);
 
             DataSource.Factory dataSourceFactory;
-            if (uri.getScheme().equals("asset") || uri.getScheme().equals("file")) {
+            boolean isInternetUrl = URLUtil.isHttpsUrl(fileUrl) || URLUtil.isHttpUrl(fileUrl);
+
+            if (!isInternetUrl) {
                 dataSourceFactory = new DefaultDataSourceFactory(context, "ExoPlayer");
             } else {
                 dataSourceFactory = new DefaultHttpDataSourceFactory("ExoPlayer", null,
