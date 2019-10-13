@@ -539,8 +539,10 @@ class PlayerService: NSObject{
             complationHandler(img)
             return
         }
-        let image = UIImage(imageLiteralResourceName: self.imagePlaceHolderPath?.absoluteString ?? "")
-        complationHandler(image)
+        if let imgPath = self.imagePlaceHolderPath?.absoluteString{
+            let image = UIImage(imageLiteralResourceName: imgPath)
+            complationHandler(image)
+        }
         SDWebImageManager.init().loadImage(with: self.currentFile?.image, options: .continueInBackground, context: nil, progress: nil) { (img, data, error, cacheType, isSuccess, url) in
             if isSuccess && img != nil{
                 complationHandler(img)
