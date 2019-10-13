@@ -1,3 +1,4 @@
+import 'package:az_player_plugin_example/utilities.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -70,6 +71,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   void initState() {
     super.initState();
+    Utilities.withCallback((){
+      this._runSample();
+    });
+    
+  }
+  
+  Future<void> _runSample() async{
+    print(Utilities().securePath);
     var seconds = 2;
     var delay = 10;
     List<AZPlayerPlugin.File> files = [];
@@ -81,9 +90,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
       AZPlayerPlugin.FileStatus.ready,
       "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
     );
-
+  
     files.add(file);
-
+  
     file = AZPlayerPlugin.File(
       1,
       "http://dl11.f2m.co/trailer/Crawl.2019.360p.Trailer.Film2Movie_WS.mp4",
@@ -92,9 +101,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
       AZPlayerPlugin.FileStatus.ready,
       "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
     );
-
+  
     files.add(file);
-
+  
     file = AZPlayerPlugin.File(
       3,
       "http://dls.tabanmusic.com/music/1398/06/26/Shahab-Mozaffari-Setayesh.mp3",
@@ -103,9 +112,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
       AZPlayerPlugin.FileStatus.ready,
       "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
     );
-
+  
     files.add(file);
-
+  
     file = AZPlayerPlugin.File(
       4,
       "http://dls.tabanmusic.com/music/1398/07/01/Mehrad-Jam-Khialet-Rahat.mp3",
@@ -114,17 +123,27 @@ class _PlayerScreenState extends State<PlayerScreen> {
       AZPlayerPlugin.FileStatus.ready,
       "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
     );
-    
+  
     AZPlayerPlugin.AzPlayerPlugin().setImagePlaceHolder('assets/logo.png');
-
-    AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(files);
+  
+//    AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(files);
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
 //      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().play()}");
+      var localAddress = Utilities().joinPath(Utilities().securePath, "900.mp3");
+      print(localAddress);
+      file = AZPlayerPlugin.File(
+        4,
+        localAddress,
+        "title 3",
+        100,
+        AZPlayerPlugin.FileStatus.ready,
+        "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
+      );
       print("play: ${await AZPlayerPlugin.AzPlayerPlugin().playWithFile(file)}");
     });
-
+  
     seconds += delay;
-
+  
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("duration: ${await AZPlayerPlugin.AzPlayerPlugin().duration}");
       print("change time: ${await AZPlayerPlugin.AzPlayerPlugin().changeTime(10)}");
@@ -132,53 +151,54 @@ class _PlayerScreenState extends State<PlayerScreen> {
       AZPlayerPlugin.InterfaceFile file = await AZPlayerPlugin.AzPlayerPlugin().currentFile;
       print("currentFile: ${file.title}");
     });
-
+  
     seconds += delay;
-
+  
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("is playing: ${await AZPlayerPlugin.AzPlayerPlugin().isPlaying}");
     });
-
+  
     seconds += delay;
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("pause: ${await AZPlayerPlugin.AzPlayerPlugin().pause()}");
     });
-
+  
     seconds += delay;
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("is playing: ${await AZPlayerPlugin.AzPlayerPlugin().isPlaying}");
     });
-
+  
     seconds += delay;
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("is playing: ${await AZPlayerPlugin.AzPlayerPlugin().play()}");
     });
-
+  
     seconds += delay;
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("next: ${await AZPlayerPlugin.AzPlayerPlugin().next()}");
     });
-
+  
     seconds += delay;
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("is playing: ${await AZPlayerPlugin.AzPlayerPlugin().isPlaying}");
     });
-
+  
     seconds += delay;
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("next: ${await AZPlayerPlugin.AzPlayerPlugin().next()}");
     });
-
+  
     seconds += delay;
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("previous: ${await AZPlayerPlugin.AzPlayerPlugin().previous()}");
     });
-
+  
     seconds += delay;
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
       print("stop: ${await AZPlayerPlugin.AzPlayerPlugin().stop()}");
     });
   }
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
