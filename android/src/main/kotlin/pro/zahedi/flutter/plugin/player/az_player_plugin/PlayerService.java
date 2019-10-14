@@ -291,7 +291,7 @@ public class PlayerService {
                 } else if (!playWhenReady && playbackState == Player.STATE_READY) {
                     initialView();
                     Log.i("player", "pause");
-                }else if (!playWhenReady && playbackState == Player.STATE_IDLE) {
+                }else if (playbackState == Player.STATE_IDLE) {
                     AzPlayerPlugin.getInstance().unBoundService();
                     Log.i("player", "stop");
                 }
