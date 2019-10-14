@@ -4,11 +4,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.provider.CalendarContract;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.URLUtil;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -212,7 +210,10 @@ public class PlayerService {
     protected void playWithFile(File file) {
 
         File currentFile = getCurrentFile();
-        if (currentFile != null && currentFile.pk == file.pk && isPlaying()) return;
+        if (currentFile != null && currentFile.pk == file.pk) {
+            if (!isPlaying()) play();
+            return;
+        }
 
         int pos = getFilePosition(file);
         this.player.prepare(concatenatingMediaSource);
