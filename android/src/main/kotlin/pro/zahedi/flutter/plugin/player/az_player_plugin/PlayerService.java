@@ -109,14 +109,13 @@ public class PlayerService {
             playerView = new FrameLayout(context);
             playerView.setBackgroundColor(Color.BLACK);
         }
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
 
         File currentFile = getCurrentFile();
         if (this.player.getVideoFormat() == null) {
             if (imageView == null) {
                 imageView = new ImageView(context);
                 imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                imageView.setLayoutParams(params);
             }
             Drawable d = null;
             try {
@@ -128,22 +127,21 @@ public class PlayerService {
             RequestOptions option = new RequestOptions().placeholder(d).error(d);
             String imagePath = currentFile == null ? "" : currentFile.image;
             Glide.with(context).setDefaultRequestOptions(option).load(imagePath).into(imageView);
-
+            imageView.setLayoutParams(params);
             playerView.removeAllViews();
             playerView.addView(imageView);
-            playerView.invalidate();
         } else {
             if (surfaceView == null) {
                 surfaceView = new SurfaceView(context);
                 this.player.setVideoSurfaceView(surfaceView);
-                surfaceView.setLayoutParams(params);
             }
+            surfaceView.setLayoutParams(params);
             playerView.removeAllViews();
             playerView.addView(surfaceView);
-            playerView.invalidate();
         }
         FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
         playerView.setLayoutParams(viewParams);
+        playerView.invalidate();
     }
 
     public void setPlayerViewSize(double width, double height) {
