@@ -364,12 +364,15 @@ class PlayerService: NSObject{
             print("file doesnt exist")
             return 
         }
+        if(file.pk == self.currentFile?.pk && file.fileStatus == .playing){
+            return
+        }
         
         if file.fileStatus == .pause{
             
             self.player?.play()
         }else{
-            
+        
             self.playerLayer?.removeFromSuperlayer()
             self.stop()
             
