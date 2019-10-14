@@ -56,13 +56,9 @@ public class PlayerService {
     // Private constructor.
     private PlayerService(Context context) {
         this.context = context;
-        TrackSelector trackSelector = new DefaultTrackSelector();
-
-        this.player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
         concatenatingMediaSource = new ConcatenatingMediaSource();
-        this.player.prepare(concatenatingMediaSource);
-
-        this.setupPlayer();
+        TrackSelector trackSelector = new DefaultTrackSelector();
+        this.player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
     }
 
     // Static function.
@@ -116,7 +112,8 @@ public class PlayerService {
             } catch (Exception e) {
             }
             RequestOptions option = new RequestOptions().placeholder(d).error(d);
-            Glide.with(context).setDefaultRequestOptions(option).load(currentFile.image).into(imageView);
+            String imagePath = currentFile == null ? "" : currentFile.image;
+            Glide.with(context).setDefaultRequestOptions(option).load(imagePath).into(imageView);
 
             playerView.removeAllViews();
             imageView.setLayoutParams(params);
@@ -143,10 +140,10 @@ public class PlayerService {
     void dispose() {
         this.stop();
         Log.i("Player", "dispose called");
-
-        if (this.player != null) {
-            this.player.release();
-        }
+        // TODO: handle
+//        if (this.player != null) {
+//            this.player.release();
+//        }
     }
 
     // Variable
@@ -172,10 +169,9 @@ public class PlayerService {
     }
 
     protected File getCurrentFile() {
-
-        if (files.size() == 0)
+        if(files.size() == 0){
             return null;
-
+        }
         return files.get(this.player.getCurrentPeriodIndex());
     }
 
@@ -257,17 +253,24 @@ public class PlayerService {
     }
 
     protected void play() {
+
+        if(AzPlayerPlugin.getInstance().isAllowToBindAudioService()){
+            this.setupPlayer();
+            AzPlayerPlugin.getInstance().bindService();
+        }
         this.player.setPlayWhenReady(true);
     }
 
     protected void stop() {
 
         this.player.stop();
+        AzPlayerPlugin.getInstance().unBoundService();
     }
 
 
     private void setupPlayer() {
 
+        this.player.prepare(concatenatingMediaSource);
 
         this.player.addListener(new Player.DefaultEventListener() {
 
@@ -288,6 +291,9 @@ public class PlayerService {
                 } else if (!playWhenReady && playbackState == Player.STATE_READY) {
                     initialView();
                     Log.i("player", "pause");
+                }else if (!playWhenReady && playbackState == Player.STATE_IDLE) {
+                    AzPlayerPlugin.getInstance().unBoundService();
+                    Log.i("player", "stop");
                 }
             }
 
