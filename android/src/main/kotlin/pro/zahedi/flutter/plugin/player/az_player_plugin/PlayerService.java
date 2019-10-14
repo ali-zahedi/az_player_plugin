@@ -1,7 +1,9 @@
 package pro.zahedi.flutter.plugin.player.az_player_plugin;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
@@ -44,7 +46,8 @@ public class PlayerService {
     private static volatile PlayerService instance = null;
     private FrameLayout playerView = null;
     private SurfaceView surfaceView;
-
+    private ImageView imageView;
+    private BitmapDrawable currentImage;
     private ConcatenatingMediaSource concatenatingMediaSource;
 
     private double width = 0;
@@ -60,6 +63,11 @@ public class PlayerService {
         TrackSelector trackSelector = new DefaultTrackSelector();
         this.player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
         this.setupPlayer();
+    }
+
+    public Bitmap getCurrentImage()
+    {
+        return currentImage.getBitmap();
     }
 
     // Static function.
@@ -104,20 +112,23 @@ public class PlayerService {
 
         File currentFile = getCurrentFile();
         if (this.player.getVideoFormat() == null) {
-            ImageView imageView = new ImageView(context);
-            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
+            if (imageView == null) {
+                imageView = new ImageView(context);
+                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                imageView.setLayoutParams(params);
+            }
             Drawable d = null;
             try {
                 d = Drawable.createFromStream(context.getAssets().open(imagePlaceHolderPath), null);
+                currentImage = (BitmapDrawable)d;
             } catch (Exception e) {
             }
+
             RequestOptions option = new RequestOptions().placeholder(d).error(d);
             String imagePath = currentFile == null ? "" : currentFile.image;
             Glide.with(context).setDefaultRequestOptions(option).load(imagePath).into(imageView);
 
             playerView.removeAllViews();
-            imageView.setLayoutParams(params);
             playerView.addView(imageView);
             playerView.invalidate();
         } else {
@@ -172,7 +183,7 @@ public class PlayerService {
     }
 
     protected File getCurrentFile() {
-        if(files.size() == 0){
+        if (files.size() == 0) {
             return null;
         }
         return files.get(this.player.getCurrentPeriodIndex());
@@ -260,7 +271,7 @@ public class PlayerService {
 
     protected void play() {
 
-        if(AzPlayerPlugin.getInstance().isAllowToBindAudioService()){
+        if (AzPlayerPlugin.getInstance().isAllowToBindAudioService()) {
             this.setupPlayer();
             AzPlayerPlugin.getInstance().bindService();
         }
@@ -297,7 +308,7 @@ public class PlayerService {
                 } else if (!playWhenReady && playbackState == Player.STATE_READY) {
                     initialView();
                     Log.i("player", "pause");
-                }else if (playbackState == Player.STATE_IDLE) {
+                } else if (playbackState== Player.STATE_IDLE) {
                     AzPlayerPlugin.getInstance().unBoundService();
                     Log.i("player", "stop");
                 }
