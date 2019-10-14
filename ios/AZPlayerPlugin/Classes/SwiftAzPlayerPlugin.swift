@@ -3,15 +3,15 @@ import UIKit
 
 public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
     fileprivate static var registrar: FlutterPluginRegistrar? = nil
-  
+    
     public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "az_player_plugin", binaryMessenger: registrar.messenger())
-        SwiftAzPlayerPlugin.registrar = registrar
-    let instance = SwiftAzPlayerPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
-    let viewFactory = FlutterPlayerViewFactory()
-    registrar.register(viewFactory, withId: "PlayerView")
-  }
+        let channel = FlutterMethodChannel(name: "az_player_plugin", binaryMessenger: registrar.messenger())
+            SwiftAzPlayerPlugin.registrar = registrar
+        let instance = SwiftAzPlayerPlugin()
+        registrar.addMethodCallDelegate(instance, channel: channel)
+        let viewFactory = FlutterPlayerViewFactory()
+        registrar.register(viewFactory, withId: "PlayerView")
+    }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     
@@ -135,8 +135,24 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
             else{
                 return nil
         }
+        // get direcotry
+        func checkFileURL(fileURL: String) -> Bool{
+            let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+            if let match = detector.firstMatch(in: fileURL, options: [], range: NSRange(location: 0, length: fileURL.utf16.count)) {
+                // it is a link, if the match covers the whole string
+                return match.range.length == fileURL.utf16.count
+            } else {
+                return false
+            }
+        }
+        var filePath: String = ""
+        if !checkFileURL(fileURL: fileURL){
+           filePath = "file://\(fileURL)"
+        }else{
+            filePath = fileURL
+        }
         let imagePath: String? = argsDict["imagePath"] as? String
-        return File(pk: pk, title: title, fileURL: URL(string: fileURL), currentTime: currentTime, fileStatus: FileStatus(rawValue: fileStatus) ?? .ready, image: URL(string: imagePath ?? ""))
+        return File(pk: pk, title: title, fileURL: URL(string: filePath), currentTime: currentTime, fileStatus: FileStatus(rawValue: fileStatus) ?? .ready, image: URL(string: imagePath ?? ""))
     }
     
     func convertToFiles(args: Any?) -> [File]{
