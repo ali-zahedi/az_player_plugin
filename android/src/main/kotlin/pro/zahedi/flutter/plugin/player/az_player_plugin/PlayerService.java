@@ -43,6 +43,8 @@ public class PlayerService {
     // Static and Volatile attribute.
     private static volatile PlayerService instance = null;
     private FrameLayout playerView = null;
+    private SurfaceView surfaceView;
+
     private ConcatenatingMediaSource concatenatingMediaSource;
 
     private double width = 0;
@@ -121,11 +123,12 @@ public class PlayerService {
             playerView.addView(imageView);
             playerView.invalidate();
         } else {
-            SurfaceView surfaceView = new SurfaceView(context);
-            this.player.setVideoSurfaceView(surfaceView);
+            if (surfaceView == null) {
+                surfaceView = new SurfaceView(context);
+                this.player.setVideoSurfaceView(surfaceView);
+                surfaceView.setLayoutParams(params);
+            }
             playerView.removeAllViews();
-            surfaceView.setLayoutParams(params);
-            surfaceView.setBackgroundColor(Color.BLACK);
             playerView.addView(surfaceView);
             playerView.invalidate();
         }
