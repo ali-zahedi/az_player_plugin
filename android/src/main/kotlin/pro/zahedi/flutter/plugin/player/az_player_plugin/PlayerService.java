@@ -1,12 +1,15 @@
 package pro.zahedi.flutter.plugin.player.az_player_plugin;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -42,6 +45,9 @@ public class PlayerService {
     // Static and Volatile attribute.
     private static volatile PlayerService instance = null;
     private FrameLayout playerView = null;
+    private SurfaceView surfaceView;
+    private ImageView imageView;
+    private BitmapDrawable currentImage;
     private ConcatenatingMediaSource concatenatingMediaSource;
 
     private double width = 0;
@@ -53,13 +59,16 @@ public class PlayerService {
     // Private constructor.
     private PlayerService(Context context) {
         this.context = context;
-        TrackSelector trackSelector = new DefaultTrackSelector();
-
-        this.player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
         concatenatingMediaSource = new ConcatenatingMediaSource();
-        this.player.prepare(concatenatingMediaSource);
-
+        TrackSelector trackSelector = new DefaultTrackSelector();
+        this.player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
         this.setupPlayer();
+    }
+
+    public Bitmap getCurrentImage()
+    {
+        if (currentImage ==null) return  null;
+        return currentImage.getBitmap();
     }
 
     // Static function.
@@ -98,36 +107,41 @@ public class PlayerService {
     private void initialView() {
         if (playerView == null) {
             playerView = new FrameLayout(context);
+            playerView.setBackgroundColor(Color.BLACK);
         }
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
 
         File currentFile = getCurrentFile();
         if (this.player.getVideoFormat() == null) {
-            ImageView imageView = new ImageView(context);
-            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
+            if (imageView == null) {
+                imageView = new ImageView(context);
+                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            }
             Drawable d = null;
             try {
                 d = Drawable.createFromStream(context.getAssets().open(imagePlaceHolderPath), null);
+                currentImage = (BitmapDrawable)d;
             } catch (Exception e) {
             }
-            RequestOptions option = new RequestOptions().placeholder(d).error(d);
-            Glide.with(context).setDefaultRequestOptions(option).load(currentFile.image).into(imageView);
 
-            playerView.removeAllViews();
+            RequestOptions option = new RequestOptions().placeholder(d).error(d);
+            String imagePath = currentFile == null ? "" : currentFile.image;
+            Glide.with(context).setDefaultRequestOptions(option).load(imagePath).into(imageView);
             imageView.setLayoutParams(params);
-            playerView.addView(imageView);
-            playerView.invalidate();
-        } else {
-            SurfaceView surfaceView = new SurfaceView(context);
-            this.player.setVideoSurfaceView(surfaceView);
             playerView.removeAllViews();
+            playerView.addView(imageView);
+        } else {
+            if (surfaceView == null) {
+                surfaceView = new SurfaceView(context);
+                this.player.setVideoSurfaceView(surfaceView);
+            }
             surfaceView.setLayoutParams(params);
+            playerView.removeAllViews();
             playerView.addView(surfaceView);
-            playerView.invalidate();
         }
         FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
         playerView.setLayoutParams(viewParams);
+        playerView.invalidate();
     }
 
     public void setPlayerViewSize(double width, double height) {
@@ -139,10 +153,10 @@ public class PlayerService {
     void dispose() {
         this.stop();
         Log.i("Player", "dispose called");
-
-        if (this.player != null) {
-            this.player.release();
-        }
+        // TODO: handle
+//        if (this.player != null) {
+//            this.player.release();
+//        }
     }
 
     // Variable
@@ -168,10 +182,9 @@ public class PlayerService {
     }
 
     protected File getCurrentFile() {
-
-        if (files.size() == 0)
+        if (files.size() == 0) {
             return null;
-
+        }
         return files.get(this.player.getCurrentPeriodIndex());
     }
 
@@ -208,7 +221,10 @@ public class PlayerService {
     protected void playWithFile(File file) {
 
         File currentFile = getCurrentFile();
-        if (currentFile != null && currentFile.pk == file.pk && isPlaying()) return;
+        if (currentFile != null && currentFile.pk == file.pk) {
+            if (!isPlaying()) play();
+            return;
+        }
 
         int pos = getFilePosition(file);
         this.player.prepare(concatenatingMediaSource);
@@ -253,17 +269,24 @@ public class PlayerService {
     }
 
     protected void play() {
+
+        if (AzPlayerPlugin.getInstance().isAllowToBindAudioService()) {
+            this.setupPlayer();
+            AzPlayerPlugin.getInstance().bindService();
+        }
         this.player.setPlayWhenReady(true);
     }
 
     protected void stop() {
 
         this.player.stop();
+        AzPlayerPlugin.getInstance().unBoundService();
     }
 
 
     private void setupPlayer() {
 
+        this.player.prepare(concatenatingMediaSource);
 
         this.player.addListener(new Player.DefaultEventListener() {
 
@@ -284,6 +307,9 @@ public class PlayerService {
                 } else if (!playWhenReady && playbackState == Player.STATE_READY) {
                     initialView();
                     Log.i("player", "pause");
+                } else if (playbackState== Player.STATE_IDLE) {
+                    AzPlayerPlugin.getInstance().unBoundService();
+                    Log.i("player", "stop");
                 }
             }
 
@@ -293,8 +319,6 @@ public class PlayerService {
                 Log.i("player", "player had error " + error);
             }
         });
-
-
     }
 
     public SimpleExoPlayer getPlayer() {
@@ -304,10 +328,13 @@ public class PlayerService {
     private void setPlaylist(List<File> files) {
 
         for (int i = 0; i < files.size(); i++) {
-            Uri uri = Uri.parse(files.get(i).fileURL);
+            String fileUrl = files.get(i).fileURL;
+            Uri uri = Uri.parse(fileUrl);
 
             DataSource.Factory dataSourceFactory;
-            if (uri.getScheme().equals("asset") || uri.getScheme().equals("file")) {
+            boolean isInternetUrl = URLUtil.isHttpsUrl(fileUrl) || URLUtil.isHttpUrl(fileUrl);
+
+            if (!isInternetUrl) {
                 dataSourceFactory = new DefaultDataSourceFactory(context, "ExoPlayer");
             } else {
                 dataSourceFactory = new DefaultHttpDataSourceFactory("ExoPlayer", null,

@@ -8,6 +8,8 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.os.IBinder;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,14 +44,18 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
     private AzPlayerPlugin(Registrar registrar) {
         this.registrar = registrar;
         PlayerService.getInstance(registrar.context());
-        this.bindService();
+        bindService();
     }
 
     // Static function.
-    private static AzPlayerPlugin getInstance(Registrar registrar) {
+    protected static AzPlayerPlugin getInstance() {
+        return AzPlayerPlugin.getInstance(null);
+    }
+
+    protected static AzPlayerPlugin getInstance(@Nullable Registrar registrar) {
         // Double check locking principle.
         // If there is no instance available, create new one (i.e. lazy initialization).
-        if (instance == null) {
+        if (instance == null && registrar != null) {
 
             // To provide thread-safe implementation.
             synchronized (AzPlayerPlugin.class) {
@@ -192,20 +198,24 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
         return false;
     }
 
-    private void bindService() {
+    protected void bindService() {
 
-        if (audioServiceBinder == null) {
+        if (this.isAllowToBindAudioService()) {
             Intent intent = new Intent(registrar.context(), AudioService.class);
             registrar.context().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
-    private void unBoundService() {
-        if (audioServiceBinder != null) {
+    protected void unBoundService() {
+        if (!this.isAllowToBindAudioService()) {
             audioServiceBinder.destroyAllPlayers();
             registrar.context().unbindService(serviceConnection);
-
+            audioServiceBinder = null;
         }
+    }
+
+    protected boolean isAllowToBindAudioService(){
+        return audioServiceBinder == null;
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {

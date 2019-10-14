@@ -152,6 +152,10 @@ class PlayerService: NSObject{
         // disable
         self.commandCenter.skipBackwardCommand.isEnabled = false
         self.commandCenter.skipForwardCommand.isEnabled = false
+        
+        // cover image
+        self.coverImageView.contentMode = .scaleAspectFit
+        self.coverImageView.clipsToBounds = true
     }
     
     // Mark: Function
@@ -361,12 +365,15 @@ class PlayerService: NSObject{
             print("file doesnt exist")
             return 
         }
+        if(file.pk == self.currentFile?.pk && file.fileStatus == .playing){
+            return
+        }
         
         if file.fileStatus == .pause{
             
             self.player?.play()
         }else{
-            
+        
             self.playerLayer?.removeFromSuperlayer()
             self.stop()
             
@@ -500,7 +507,6 @@ class PlayerService: NSObject{
             self.getImage { (image) in
                 self.coverImageView.image = image
             }
-            self.coverImageView.contentMode = .scaleAspectFit
             self.coverImageView.frame = PlayerView.view.bounds
             PlayerView.view.addSubview(self.coverImageView)
             PlayerView.view.bringSubviewToFront(self.coverImageView)
@@ -537,8 +543,10 @@ class PlayerService: NSObject{
             complationHandler(img)
             return
         }
-        let image = UIImage(imageLiteralResourceName: self.imagePlaceHolderPath?.absoluteString ?? "")
-        complationHandler(image)
+        if let imgPath = self.imagePlaceHolderPath?.absoluteString{
+            let image = UIImage(imageLiteralResourceName: imgPath)
+            complationHandler(image)
+        }
         SDWebImageManager.init().loadImage(with: self.currentFile?.image, options: .continueInBackground, context: nil, progress: nil) { (img, data, error, cacheType, isSuccess, url) in
             if isSuccess && img != nil{
                 complationHandler(img)
