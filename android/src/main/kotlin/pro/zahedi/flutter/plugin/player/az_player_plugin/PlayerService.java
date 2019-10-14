@@ -125,6 +125,7 @@ public class PlayerService {
             this.player.setVideoSurfaceView(surfaceView);
             playerView.removeAllViews();
             surfaceView.setLayoutParams(params);
+            surfaceView.setBackgroundColor(Color.BLACK);
             playerView.addView(surfaceView);
             playerView.invalidate();
         }
