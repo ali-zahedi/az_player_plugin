@@ -78,7 +78,7 @@ class PersistentNotification {
         @Nullable
         @Override
         public Bitmap getCurrentLargeIcon(Player player, BitmapCallback callback) {
-            return null;
+            return playerService.getCurrentImage();
         }
     }
 
