@@ -4,6 +4,8 @@
 
 * Add fast forward and fast backward in iOS version
 
+* Fix close notification in android 
+
 ## 0.0.6
 
 * Get current file

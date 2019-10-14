@@ -153,7 +153,8 @@ class PlayerService: NSObject{
         self.commandCenter.skipBackwardCommand.isEnabled = false
         self.commandCenter.skipForwardCommand.isEnabled = false
         
-        self.coverImageView.contentMode = .scaleAspectFill
+        // cover image
+        self.coverImageView.contentMode = .scaleAspectFit
         self.coverImageView.clipsToBounds = true
     }
     
@@ -364,12 +365,15 @@ class PlayerService: NSObject{
             print("file doesnt exist")
             return 
         }
+        if(file.pk == self.currentFile?.pk && file.fileStatus == .playing){
+            return
+        }
         
         if file.fileStatus == .pause{
             
             self.player?.play()
         }else{
-            
+        
             self.playerLayer?.removeFromSuperlayer()
             self.stop()
             
