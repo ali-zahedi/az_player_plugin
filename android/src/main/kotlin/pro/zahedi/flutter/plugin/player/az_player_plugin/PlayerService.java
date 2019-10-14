@@ -67,6 +67,7 @@ public class PlayerService {
 
     public Bitmap getCurrentImage()
     {
+        if (currentImage ==null) return  null;
         return currentImage.getBitmap();
     }
 
