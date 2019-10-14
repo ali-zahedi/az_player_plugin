@@ -25,21 +25,11 @@ import io.flutter.view.TextureRegistry;
 public class AudioServiceBinder extends Binder {
 
     private Service service;
-    private Context context;
-    private final String TAG = "audio service binder";
 
     AudioServiceBinder(Service service) {
         this.service = service;
     }
 
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
-
-    }
 
     public void create(Context context) {
 //        Log.i(TAG, "starting player in bakground");
@@ -56,16 +46,13 @@ public class AudioServiceBinder extends Binder {
 
     }
 
-    public PlayerService getPlayer(long textureId) {
-        return PlayerService.getInstance();
-    }
-
     public void destroyAllPlayers() {
 //        for (Long key : videoPlayers.keySet()) {
 //            videoPlayers.get(key).dispose();
 //           //  System.out.println("Key = " + key);
 //        }
-        PlayerService.getInstance().dispose();
+        // TODO: handle for loop
+//        PlayerService.getInstance().dispose();
     }
 
     public void removePlayer(long textureId) {

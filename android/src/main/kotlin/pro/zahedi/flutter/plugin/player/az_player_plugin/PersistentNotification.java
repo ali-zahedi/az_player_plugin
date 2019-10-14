@@ -1,11 +1,13 @@
 package pro.zahedi.flutter.plugin.player.az_player_plugin;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.graphics.Bitmap;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import android.support.v4.media.session.MediaSessionCompat;
 
@@ -37,6 +39,7 @@ class PersistentNotification {
 
     }
 
+    @SuppressLint("WrongConstant")
     void createNotification() {
         playerNotificationManager = PlayerNotificationManager.createWithNotificationChannel(service,
                 PLAYBACK_CHANNEL_ID, R.string.playback_channel_name, PLAYBACK_NOTIFICATION_ID,
@@ -44,6 +47,8 @@ class PersistentNotification {
 
         playerNotificationManager.setNotificationListener(new MyNotificationListener());
         playerNotificationManager.setPlayer(playerService.getPlayer());
+        playerNotificationManager.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        playerNotificationManager.setUseNavigationActions(false);
     }
 
     private class MyMediaDescriptionAdapter implements MediaDescriptionAdapter {

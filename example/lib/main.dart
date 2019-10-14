@@ -84,7 +84,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     List<AZPlayerPlugin.File> files = [];
     var file = AZPlayerPlugin.File(
       0,
-      "http://dl11.f2m.co/trailer/Crawl.2019.360p.Trailer.Film2Movie_WS.mp4",
+      "http://dls.tabanmusic.com/music/1398/07/01/Mehrad-Jam-Khialet-Rahat.mp3",
       "title 0",
       0,
       AZPlayerPlugin.FileStatus.ready,
@@ -95,7 +95,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   
     file = AZPlayerPlugin.File(
       1,
-      "http://dl11.f2m.co/trailer/Crawl.2019.360p.Trailer.Film2Movie_WS.mp4",
+      "http://dls.tabanmusic.com/music/1398/07/01/Mehrad-Jam-Khialet-Rahat.mp3",
       "title 1",
       10,
       AZPlayerPlugin.FileStatus.ready,
@@ -118,7 +118,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     file = AZPlayerPlugin.File(
       4,
       "http://dls.tabanmusic.com/music/1398/07/01/Mehrad-Jam-Khialet-Rahat.mp3",
-      "title 3",
+      "title 2",
       100,
       AZPlayerPlugin.FileStatus.ready,
       "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
@@ -126,19 +126,19 @@ class _PlayerScreenState extends State<PlayerScreen> {
   
     AZPlayerPlugin.AzPlayerPlugin().setImagePlaceHolder('assets/logo.png');
   
-//    AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(files);
+    AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(files);
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
 //      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().play()}");
-      var localAddress = Utilities().joinPath(Utilities().securePath, "900.mp3");
-      print(localAddress);
-      file = AZPlayerPlugin.File(
-        4,
-        localAddress,
-        "title 3",
-        100,
-        AZPlayerPlugin.FileStatus.ready,
-        "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
-      );
+//      var localAddress = Utilities().joinPath(Utilities().securePath, "900.mp3");
+//      print(localAddress);
+//      file = AZPlayerPlugin.File(
+//        4,
+//        localAddress,
+//        "title 3",
+//        100,
+//        AZPlayerPlugin.FileStatus.ready,
+//        "https://www.gravatar.com/avatar/07b6e2b2cf9e19feddbb83572ce12d93?s=400&amp;d=identicon&amp;r=PG",
+//      );
       print("play: ${await AZPlayerPlugin.AzPlayerPlugin().playWithFile(file)}");
     });
   
