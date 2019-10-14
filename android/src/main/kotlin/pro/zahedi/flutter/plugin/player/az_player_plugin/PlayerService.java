@@ -59,6 +59,7 @@ public class PlayerService {
         concatenatingMediaSource = new ConcatenatingMediaSource();
         TrackSelector trackSelector = new DefaultTrackSelector();
         this.player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        this.setupPlayer();
     }
 
     // Static function.
