@@ -4,7 +4,9 @@
 
 * Add fast forward and fast backward in iOS version
 
-* Fix close notification in android 
+* Fix close notification in android
+
+* Add aspect ratio for get player view 
 
 ## 0.0.6
 

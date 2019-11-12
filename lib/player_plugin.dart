@@ -56,10 +56,20 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   @override
-  Widget getPlayerView({num width = 300, num height = 300}) {
+  Widget getPlayerView({num width = 16, num height = 9, bool isProtectAspectRation=true}) {
     Map<String, String> creationParams = {};
-    final w = width.toDouble();
-    final h = height.toDouble();
+    
+    double w = width.toDouble();
+    double h = height.toDouble();
+    double division = (w / 16 ) / (h / 9);
+    
+    if (division >= 1){
+      // the width bigger than height
+      w = w / division;
+    }else {
+      // the height bigger than width
+      h = h * division;
+    }
     creationParams['width'] = w.toString();
     creationParams['height'] = h.toString();
 
@@ -82,8 +92,8 @@ class AzPlayerPlugin implements InterfacePlayer {
     }
     
     return SizedBox(
-      width: w,
-      height: h,
+      width: width.toDouble(),
+      height: height.toDouble(),
       child: playerView,
     );
   }

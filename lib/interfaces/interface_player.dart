@@ -18,7 +18,7 @@ abstract class InterfacePlayer{
 	// در حال پخش بودن
 	Future<bool> get isPlaying;
 	
-	Widget getPlayerView({num width=300, num height=300});
+	Widget getPlayerView({num width=16, num height=9, bool isProtectAspectRation=true});
 	
 	Future<bool> play();
 	
