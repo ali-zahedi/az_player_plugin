@@ -19,11 +19,11 @@ class AzPlayerPlugin implements InterfacePlayer {
   LinkedHashSet<File> _files = new LinkedHashSet<File>();
 
   @override
-  Future<InterfaceFile> get currentFile async{
+  Future<InterfaceFile> get currentFile async {
     final num pk = await _channel.invokeMethod('currentFile');
     File file;
-    for(var i = 0; i< this._files.length; i++){
-      if(this._files.elementAt(i).pk == pk){
+    for (var i = 0; i < this._files.length; i++) {
+      if (this._files.elementAt(i).pk == pk) {
         file = this._files.elementAt(i);
         break;
       }
@@ -32,19 +32,19 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   @override
-  Future<num> get duration async{
+  Future<num> get duration async {
     final num result = await _channel.invokeMethod('duration');
     return result;
   }
 
   @override
-  Future<num> get currentTime async{
+  Future<num> get currentTime async {
     final num result = await _channel.invokeMethod('currentTime');
     return result;
   }
 
   @override
-  Future<bool> get isPlaying async{
+  Future<bool> get isPlaying async {
     final bool isPlaying = await _channel.invokeMethod('isPlaying');
     return isPlaying;
   }
@@ -56,17 +56,18 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   @override
-  Widget getPlayerView({num width = 16, num height = 9, bool isProtectAspectRation=true}) {
+  Widget getPlayerView(
+      {num width = 16, num height = 9, bool isProtectAspectRation = true}) {
     Map<String, String> creationParams = {};
-    
+
     double w = width.toDouble();
     double h = height.toDouble();
-    double division = (w / 16 ) / (h / 9);
-    
-    if (division >= 1){
+    double division = (w / 16) / (h / 9);
+
+    if (division >= 1) {
       // the width bigger than height
       w = w / division;
-    }else {
+    } else {
       // the height bigger than width
       h = h * division;
     }
@@ -83,72 +84,76 @@ class AzPlayerPlugin implements InterfacePlayer {
       );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       playerView = UiKitView(
-          viewType: 'PlayerView',
-          creationParams: creationParams,
-          creationParamsCodec: StandardMessageCodec(),
-        );
-    }else{
+        viewType: 'PlayerView',
+        creationParams: creationParams,
+        creationParamsCodec: StandardMessageCodec(),
+      );
+    } else {
       playerView = Container();
     }
-    
+
     return SizedBox(
       width: width.toDouble(),
       height: height.toDouble(),
-      child: playerView,
+      child: Center(
+        child: playerView,
+      ),
     );
   }
 
   @override
   Future<bool> addFileToPlayList(InterfaceFile file) async {
-  
-    final bool result = await _channel.invokeMethod('addFileToPlayList', file.toJson());
+    final bool result =
+        await _channel.invokeMethod('addFileToPlayList', file.toJson());
     this._files.add(file);
     return result;
   }
 
   @override
-  Future<bool> addFilesToPlayList(List<InterfaceFile> files) async{
+  Future<bool> addFilesToPlayList(List<InterfaceFile> files) async {
     List<Map<String, dynamic>> filesJson = [];
-    files.forEach((elem){
+    files.forEach((elem) {
       filesJson.add(elem.toJson());
       this._files.add(elem);
     });
-    final bool result = await _channel.invokeMethod('addFilesToPlayList', filesJson);;
+    final bool result =
+        await _channel.invokeMethod('addFilesToPlayList', filesJson);
+    ;
     return result;
   }
 
   @override
-  Future<bool> changeTime(num toSecond) async{
+  Future<bool> changeTime(num toSecond) async {
     final bool result = await _channel.invokeMethod('changeTime', toSecond);
     return result;
   }
 
   @override
-  Future<bool> emptyPlayList() async{
+  Future<bool> emptyPlayList() async {
     final bool result = await _channel.invokeMethod('emptyPlayList');
     this._files.clear();
     return result;
   }
 
   @override
-  Future<List<InterfaceFile>> getPlayList() async{
+  Future<List<InterfaceFile>> getPlayList() async {
     return this._files.toList();
   }
 
   @override
-  Future<bool> next() async{
+  Future<bool> next() async {
     final bool result = await _channel.invokeMethod('next');
     return result;
   }
 
   @override
-  Future<bool> pause() async{
+  Future<bool> pause() async {
     final bool result = await _channel.invokeMethod('pause');
     return result;
   }
 
   @override
-  Future<bool> play() async{
+  Future<bool> play() async {
     final bool result = await _channel.invokeMethod('play');
     return result;
   }
@@ -156,7 +161,8 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> playWithFile(InterfaceFile file) async {
     this._files.add(file);
-    final bool result = await _channel.invokeMethod('playWithFile', file.toJson());
+    final bool result =
+        await _channel.invokeMethod('playWithFile', file.toJson());
     return result;
   }
 
@@ -167,33 +173,35 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   @override
-  Future<bool> removeFromPlayList(InterfaceFile file) async{
-    final bool result = await _channel.invokeMethod('removeFromPlayList', file.toJson());
+  Future<bool> removeFromPlayList(InterfaceFile file) async {
+    final bool result =
+        await _channel.invokeMethod('removeFromPlayList', file.toJson());
     this._files.removeWhere((value) => value.pk == file.pk);
     return result;
   }
 
   @override
-  Future<bool> stop() async{
+  Future<bool> stop() async {
     final bool result = await _channel.invokeMethod('stop');
     return result;
   }
 
   @override
-  Future<bool> fastBackward() async{
+  Future<bool> fastBackward() async {
     final bool result = await _channel.invokeMethod('fastBackward');
     return result;
   }
 
   @override
-  Future<bool> fastForward() async{
+  Future<bool> fastForward() async {
     final bool result = await _channel.invokeMethod('fastForward');
     return result;
   }
 
   @override
-  Future<bool> setImagePlaceHolder(String path) async{
-    final bool result = await _channel.invokeMethod('setImagePlaceHolder', path);
+  Future<bool> setImagePlaceHolder(String path) async {
+    final bool result =
+        await _channel.invokeMethod('setImagePlaceHolder', path);
     return result;
   }
 }
