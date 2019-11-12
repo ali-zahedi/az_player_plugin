@@ -92,6 +92,11 @@ class AzPlayerPlugin implements InterfacePlayer {
       playerView = Container();
     }
 
+    Map<String, dynamic> size = Map();
+    size['width'] = w;
+    size['height'] = h;
+    _channel.invokeMethod('changeScreenSize', size);
+    
     return SizedBox(
       width: width.toDouble(),
       height: height.toDouble(),

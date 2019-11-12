@@ -118,7 +118,22 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
         
         PlayerService.shared.setImagePlaceHolder(imagePath: imagePath)
         result(true)
-     }
+    }else if(call.method == "changeScreenSize"){
+        
+        guard let argsDict = call.arguments as? Dictionary<String, Any> else {
+            
+            result(false)
+            return
+        }
+        
+        guard let width = argsDict["width"] as? Double,
+        let height = argsDict["height"] as? Double
+        else{
+            result(false)
+            return
+        }
+        PlayerView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+    }
   }
     
     func convertToFile(args: Any?) -> File?{

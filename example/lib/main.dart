@@ -67,6 +67,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
   Color _iconColor = Colors.deepOrange;
   double _iconSize = 40;
   double _fileCurrentPlayTimeMs = 3;
+  num _playerViewWidth = 160;
+  num _playerViewHeight = 90;
   
   @override
   void initState() {
@@ -74,7 +76,20 @@ class _PlayerScreenState extends State<PlayerScreen> {
     Utilities.withCallback((){
       this._runSample();
     });
-    
+
+    Timer timer;
+
+    timer = Timer.periodic(Duration(seconds: 3), (_)
+    {
+      num increase = 50;
+      this._playerViewWidth = this._playerViewWidth + ((increase / 9) * 16);
+      this._playerViewHeight = this._playerViewHeight + increase;
+      print(this._playerViewWidth);
+      print(this._playerViewHeight);
+      setState(() {
+      
+      });
+    });
   }
   
   Future<void> _runSample() async{
@@ -82,9 +97,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
     var seconds = 2;
     var delay = 10;
     List<AZPlayerPlugin.File> files = [];
+    var musicVideo = "http://srv1.mihan.xyz/s7/archive/turkish/v/Vefa%20Serifova/video/480/Vefa%20Serifova%20-%20Goresen%20O%20Harda%20[MihanMusic]%20480.mp4";
     var file = AZPlayerPlugin.File(
       0,
-      "http://dls.tabanmusic.com/music/1398/07/01/Mehrad-Jam-Khialet-Rahat.mp3",
+      musicVideo,
       "title 0",
       0,
       AZPlayerPlugin.FileStatus.ready,
@@ -95,7 +111,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   
     file = AZPlayerPlugin.File(
       1,
-      "http://dls.tabanmusic.com/music/1398/07/01/Mehrad-Jam-Khialet-Rahat.mp3",
+      musicVideo,
       "title 1",
       10,
       AZPlayerPlugin.FileStatus.ready,
@@ -106,7 +122,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   
     file = AZPlayerPlugin.File(
       3,
-      "http://dls.tabanmusic.com/music/1398/06/26/Shahab-Mozaffari-Setayesh.mp3",
+      musicVideo,
       "title 2",
       20,
       AZPlayerPlugin.FileStatus.ready,
@@ -117,7 +133,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   
     file = AZPlayerPlugin.File(
       4,
-      "http://dls.tabanmusic.com/music/1398/07/01/Mehrad-Jam-Khialet-Rahat.mp3",
+      musicVideo,
       "title 2",
       100,
       AZPlayerPlugin.FileStatus.ready,
@@ -208,7 +224,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             children: <Widget>[
               Expanded(
                 flex: 1,
-                child: AZPlayerPlugin.AzPlayerPlugin().getPlayerView(width: 300, height: 100),
+                child: AZPlayerPlugin.AzPlayerPlugin().getPlayerView(width: this._playerViewWidth, height: this._playerViewHeight),
               ),
               Expanded(
                 flex: 2,
