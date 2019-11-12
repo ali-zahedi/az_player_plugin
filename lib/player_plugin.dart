@@ -96,7 +96,11 @@ class AzPlayerPlugin implements InterfacePlayer {
       width: width.toDouble(),
       height: height.toDouble(),
       child: Center(
-        child: playerView,
+        child: Container(
+          width: w,
+          height: h,
+          child: playerView,
+        ),
       ),
     );
   }
