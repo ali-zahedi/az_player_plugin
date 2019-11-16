@@ -97,7 +97,7 @@ class AzPlayerPlugin implements InterfacePlayer {
     size['height'] = h;
     _channel.invokeMethod('changeScreenSize', size);
     
-    return SizedBox(
+    return Container(
       width: width.toDouble(),
       height: height.toDouble(),
       child: Center(

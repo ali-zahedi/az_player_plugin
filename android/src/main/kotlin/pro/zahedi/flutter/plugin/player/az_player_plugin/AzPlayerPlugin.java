@@ -189,6 +189,14 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
                 result.success(true);
                 break;
             }
+            case "changeScreenSize": {
+                Map<String, Object> sizeJson = (Map<String, Object>) call.arguments;
+                double width = Double.parseDouble(sizeJson.get("width").toString());
+                double height = Double.parseDouble(sizeJson.get("height").toString());
+                PlayerService.getInstance().setPlayerViewSize(width, height);
+                result.success(true);
+                break;
+            }
         }
     }
 
