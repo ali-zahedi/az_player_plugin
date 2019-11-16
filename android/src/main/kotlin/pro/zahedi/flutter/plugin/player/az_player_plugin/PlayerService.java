@@ -115,7 +115,7 @@ public class PlayerService {
             playerView = new FrameLayout(context);
             playerView.setBackgroundColor(Color.BLACK);
         }
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
+//        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
 
         File currentFile = getCurrentFile();
         if (this.player.getVideoFormat() == null) {
@@ -133,7 +133,7 @@ public class PlayerService {
             RequestOptions option = new RequestOptions().placeholder(d).error(d);
             String imagePath = currentFile == null ? "" : currentFile.image;
             Glide.with(context).setDefaultRequestOptions(option).load(imagePath).into(imageView);
-            imageView.setLayoutParams(params);
+//            imageView.setLayoutParams(params);
             playerView.removeAllViews();
             playerView.addView(imageView);
         } else {
@@ -141,19 +141,30 @@ public class PlayerService {
                 surfaceView = new SurfaceView(context);
                 this.player.setVideoSurfaceView(surfaceView);
             }
-            surfaceView.setLayoutParams(params);
+//            surfaceView.setLayoutParams(params);
             playerView.removeAllViews();
             playerView.addView(surfaceView);
         }
-        FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
-        playerView.setLayoutParams(viewParams);
+//        FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
+//        playerView.setLayoutParams(params);
+        this.applySizeScreen();
         playerView.invalidate();
+    }
+
+    private void applySizeScreen(){
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
+        if(imageView != null)
+            imageView.setLayoutParams(params);
+        if(surfaceView != null)
+            surfaceView.setLayoutParams(params);
+        if(playerView != null)
+            playerView.setLayoutParams(params);
     }
 
     public void setPlayerViewSize(double width, double height) {
         this.width = width;
         this.height = height;
-        initialView();
+        this.applySizeScreen();
     }
 
     void dispose() {
