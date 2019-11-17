@@ -57,7 +57,9 @@ class AzPlayerPlugin implements InterfacePlayer {
 
   @override
   Widget getPlayerView(
-      {num width = 16, num height = 9, bool isProtectAspectRation = true}) {
+      {@required BuildContext context, num width = 16, num height = 9, bool isProtectAspectRation = true}) {
+    assert(context != null);
+    
     Map<String, String> creationParams = {};
 
     double w = width.toDouble();
@@ -93,8 +95,8 @@ class AzPlayerPlugin implements InterfacePlayer {
     }
 
     Map<String, dynamic> size = Map();
-    size['width'] = w;
-    size['height'] = h;
+    size['width'] = w * _calculatePixelRatio(context);
+    size['height'] = h * _calculatePixelRatio(context);
     _channel.invokeMethod('changeScreenSize', size);
     
     return Container(
@@ -212,5 +214,11 @@ class AzPlayerPlugin implements InterfacePlayer {
     final bool result =
         await _channel.invokeMethod('setImagePlaceHolder', path);
     return result;
+  }
+
+  // calculate size
+  double _calculatePixelRatio(BuildContext context){
+    MediaQueryData queryData = MediaQuery.of(context);
+    return Platform.isAndroid ? queryData.devicePixelRatio : 1.0;
   }
 }
