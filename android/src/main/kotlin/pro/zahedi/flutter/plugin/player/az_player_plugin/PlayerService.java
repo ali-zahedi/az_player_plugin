@@ -307,7 +307,7 @@ public class PlayerService {
 
     protected void stop() {
 
-        this.player.stop();
+//        this.player.stop();
         AzPlayerPlugin.getInstance().unBoundService();
     }
 
