@@ -44,7 +44,8 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
     private AzPlayerPlugin(Registrar registrar) {
         this.registrar = registrar;
         PlayerService.getInstance(registrar.context());
-        bindService();
+//        bindService();
+//        PlayerService.getInstance().stop();
     }
 
     // Static function.

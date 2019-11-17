@@ -224,7 +224,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             children: <Widget>[
               Expanded(
                 flex: 1,
-                child: AZPlayerPlugin.AzPlayerPlugin().getPlayerView(context: context, width: this._playerViewWidth, height: this._playerViewHeight),
+                child: AZPlayerPlugin.AzPlayerPlugin().getPlayerView(context: this.context, width: this._playerViewWidth, height: this._playerViewHeight),
               ),
               Expanded(
                 flex: 2,
