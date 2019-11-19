@@ -57,7 +57,7 @@ class AzPlayerPlugin implements InterfacePlayer {
 
   @override
   Widget getPlayerView(
-      {@required BuildContext context, num width = 16, num height = 9, bool isProtectAspectRation = true}) {
+      {@required BuildContext context, num width = 0, num height = 0, bool isProtectAspectRation = true}) {
     assert(context != null);
     assert(width != null);
     assert(height != null);
