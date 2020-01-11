@@ -250,3 +250,5 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+pubspec.yaml
+pubspec.lock
