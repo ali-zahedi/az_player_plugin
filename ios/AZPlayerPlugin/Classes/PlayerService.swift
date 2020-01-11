@@ -78,7 +78,7 @@ class PlayerService: NSObject{
         set{
             self._currentFile = newValue
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "changeFilePlayLoadInMemory"), object: nil, userInfo: nil)
-           
+            
         }get{
             return self._currentFile
         }
@@ -88,12 +88,12 @@ class PlayerService: NSObject{
         
         didSet{
             
-//            self.updateUI()
-
-                
+            //            self.updateUI()
+            
+            
             oldValue?.fileStatus = .ready
-                oldValue?.currentTime = 0.0
-    
+            oldValue?.currentTime = 0.0
+            
         }
     }
     
@@ -130,21 +130,44 @@ class PlayerService: NSObject{
         }
         
         // previouse
-                self.commandCenter.previousTrackCommand.isEnabled = true
-                self.commandCenter.previousTrackCommand.addTarget(self, action: #selector(playBackward))
-//                 next
-                self.commandCenter.nextTrackCommand.isEnabled = true
-                self.commandCenter.nextTrackCommand.addTarget(self, action: #selector(playNext))
+        self.commandCenter.previousTrackCommand.isEnabled = true
+        self.commandCenter.previousTrackCommand.addTarget { [unowned self] event in
+            self.playBackward()
+            return .success
+        }
+        //                 next
+        self.commandCenter.nextTrackCommand.isEnabled = true
+        self.commandCenter.nextTrackCommand.addTarget{ [unowned self] event in
+            self.playNext()
+            return .success
+        }
         // play
         self.commandCenter.playCommand.isEnabled = true
-        self.commandCenter.playCommand.addTarget(self, action: #selector(playAction))
+        self.commandCenter.playCommand.addTarget{ [unowned self] event in
+            if self.player?.rate == 0.0 {
+                self.playAction()
+                return .success
+            }
+            return .commandFailed
+        }
         // pause
         self.commandCenter.pauseCommand.isEnabled = true
-        self.commandCenter.pauseCommand.addTarget(self, action: #selector(pause))
+        self.commandCenter.pauseCommand.addTarget{ [unowned self] event in
+            
+            self.pause()
+            return .success
+            
+        }
         // playbackposition
         if #available(iOS 9.1, *) {
             self.commandCenter.changePlaybackPositionCommand.isEnabled = true
-            self.commandCenter.changePlaybackPositionCommand.addTarget(self, action: #selector(changedThumbSliderOnLockScreen(_:)))
+            self.commandCenter.changePlaybackPositionCommand.addTarget{ [unowned self] event in
+                if let e = event as? MPChangePlaybackPositionCommandEvent{
+                    self.changedThumbSliderOnLockScreen(e)
+                return .success
+                }
+                return .commandFailed
+            }
         } else {
             // Fallback on earlier versions
         }
@@ -373,7 +396,7 @@ class PlayerService: NSObject{
             
             self.player?.play()
         }else{
-        
+            
             self.playerLayer?.removeFromSuperlayer()
             self.stop()
             

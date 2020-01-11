@@ -252,3 +252,5 @@ lint/tmp/
 # lint/reports/
 pubspec.lock
 .flutter-plugins-dependencies
+Podfile.lock
+Flutter.podspec
