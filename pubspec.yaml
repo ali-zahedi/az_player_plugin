@@ -1,10 +1,7 @@
 name: az_player_plugin
 description: A Flutter player plugin
-version: 0.0.6
-authors: [
-  Ali ZahediGol <ali.zahedigol@gmail.com>,
-  Masoud Karamian <masoudk.2000@gmail.com>
-]
+version: 0.0.7
+
 homepage: https://github.com/ali-zahedi/az_player_plugin
 
 environment:

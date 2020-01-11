@@ -18,15 +18,19 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
@@ -52,6 +56,8 @@ public class PlayerService {
 
     private double width = 0;
     private double height = 0;
+
+    private int currentPosition = 0;
 
     private String imagePlaceHolderPath;
 
@@ -109,7 +115,7 @@ public class PlayerService {
             playerView = new FrameLayout(context);
             playerView.setBackgroundColor(Color.BLACK);
         }
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
+//        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
 
         File currentFile = getCurrentFile();
         if (this.player.getVideoFormat() == null) {
@@ -127,7 +133,7 @@ public class PlayerService {
             RequestOptions option = new RequestOptions().placeholder(d).error(d);
             String imagePath = currentFile == null ? "" : currentFile.image;
             Glide.with(context).setDefaultRequestOptions(option).load(imagePath).into(imageView);
-            imageView.setLayoutParams(params);
+//            imageView.setLayoutParams(params);
             playerView.removeAllViews();
             playerView.addView(imageView);
         } else {
@@ -135,19 +141,30 @@ public class PlayerService {
                 surfaceView = new SurfaceView(context);
                 this.player.setVideoSurfaceView(surfaceView);
             }
-            surfaceView.setLayoutParams(params);
+//            surfaceView.setLayoutParams(params);
             playerView.removeAllViews();
             playerView.addView(surfaceView);
         }
-        FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
-        playerView.setLayoutParams(viewParams);
+//        FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
+//        playerView.setLayoutParams(params);
+        this.applySizeScreen();
         playerView.invalidate();
+    }
+
+    private void applySizeScreen(){
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
+        if(imageView != null)
+            imageView.setLayoutParams(params);
+        if(surfaceView != null)
+            surfaceView.setLayoutParams(params);
+        if(playerView != null)
+            playerView.setLayoutParams(params);
     }
 
     public void setPlayerViewSize(double width, double height) {
         this.width = width;
         this.height = height;
-        initialView();
+        this.applySizeScreen();
     }
 
     void dispose() {
@@ -182,10 +199,11 @@ public class PlayerService {
     }
 
     protected File getCurrentFile() {
+
         if (files.size() == 0) {
             return null;
         }
-        return files.get(this.player.getCurrentPeriodIndex());
+        return files.get(this.player.getCurrentWindowIndex());
     }
 
     protected void addFileToList(File file) {
@@ -211,14 +229,19 @@ public class PlayerService {
     }
 
     protected void playBackward() {
+        preparePlayerService();
         this.player.previous();
+        currentPosition = this.player.getCurrentWindowIndex();
     }
 
     protected void playNext() {
+        preparePlayerService();
         this.player.next();
+        currentPosition = this.player.getCurrentWindowIndex();
     }
 
     protected void playWithFile(File file) {
+        preparePlayerService();
 
         File currentFile = getCurrentFile();
         if (currentFile != null && currentFile.pk == file.pk) {
@@ -226,10 +249,10 @@ public class PlayerService {
             return;
         }
 
-        int pos = getFilePosition(file);
+        currentPosition = getFilePosition(file);
         this.player.prepare(concatenatingMediaSource);
-        this.player.seekToDefaultPosition(pos);
-        this.play();
+        this.player.seekTo(currentPosition, (long) file.currentTime);
+        this.player.setPlayWhenReady(true);
 
     }
 
@@ -268,12 +291,17 @@ public class PlayerService {
         this.changeCurrentTime(this.getCurrentTime() - 5);
     }
 
-    protected void play() {
-
+    private void preparePlayerService() {
         if (AzPlayerPlugin.getInstance().isAllowToBindAudioService()) {
             this.setupPlayer();
             AzPlayerPlugin.getInstance().bindService();
+            this.player.seekToDefaultPosition(currentPosition);
         }
+    }
+
+    protected void play() {
+
+        preparePlayerService();
         this.player.setPlayWhenReady(true);
     }
 
@@ -287,18 +315,56 @@ public class PlayerService {
     private void setupPlayer() {
 
         this.player.prepare(concatenatingMediaSource);
-
-        this.player.addListener(new Player.DefaultEventListener() {
+        this.player.addListener(new Player.EventListener() {
 
             @Override
-            public void onPositionDiscontinuity(@Player.DiscontinuityReason int reason) {
-                Log.i("Player", "position changed called" + reason);
+            public void onTimelineChanged(Timeline timeline, @androidx.annotation.Nullable Object manifest, int reason) {
+                Log.d("PositionDiscontinuity", String.valueOf(reason));
             }
 
             @Override
-            public void onPlayerStateChanged(final boolean playWhenReady, final int playbackState) {
-                super.onPlayerStateChanged(playWhenReady, playbackState);
+            public void onPositionDiscontinuity(int reason) {
+                Log.d("PositionDiscontinuity", String.valueOf(reason));
+            }
 
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+
+            }
+
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+            }
+
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+
+            }
+
+            @Override
+            public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+            }
+
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+
+            }
+
+            @Override
+            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+            }
+
+            @Override
+            public void onSeekProcessed() {
+                Log.d("PositionDiscontinuity", "seeked");
+
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 if (playbackState == Player.STATE_BUFFERING) {
                     Log.i("player", "bufferingUpdate");
                 } else if (playWhenReady && playbackState == Player.STATE_READY) {
@@ -307,19 +373,14 @@ public class PlayerService {
                 } else if (!playWhenReady && playbackState == Player.STATE_READY) {
                     initialView();
                     Log.i("player", "pause");
-                } else if (playbackState== Player.STATE_IDLE) {
+                } else if (playbackState == Player.STATE_IDLE) {
                     AzPlayerPlugin.getInstance().unBoundService();
                     Log.i("player", "stop");
                 }
             }
-
-            @Override
-            public void onPlayerError(final ExoPlaybackException error) {
-                super.onPlayerError(error);
-                Log.i("player", "player had error " + error);
-            }
         });
     }
+
 
     public SimpleExoPlayer getPlayer() {
         return this.player;

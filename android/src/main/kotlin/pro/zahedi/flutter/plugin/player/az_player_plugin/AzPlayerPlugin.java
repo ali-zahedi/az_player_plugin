@@ -44,7 +44,8 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
     private AzPlayerPlugin(Registrar registrar) {
         this.registrar = registrar;
         PlayerService.getInstance(registrar.context());
-        bindService();
+//        bindService();
+//        PlayerService.getInstance().stop();
     }
 
     // Static function.
@@ -186,6 +187,14 @@ public class AzPlayerPlugin implements MethodCallHandler, ViewDestroyListener {
             }
             case "changeTime": {
                 PlayerService.getInstance().changeCurrentTime(Double.parseDouble(call.arguments.toString()));
+                result.success(true);
+                break;
+            }
+            case "changeScreenSize": {
+                Map<String, Object> sizeJson = (Map<String, Object>) call.arguments;
+                double width = Double.parseDouble(sizeJson.get("width").toString());
+                double height = Double.parseDouble(sizeJson.get("height").toString());
+                PlayerService.getInstance().setPlayerViewSize(width, height);
                 result.success(true);
                 break;
             }
