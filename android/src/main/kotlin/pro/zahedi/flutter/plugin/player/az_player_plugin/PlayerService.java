@@ -292,9 +292,9 @@ public class PlayerService {
     }
 
     private void preparePlayerService() {
-        if (AzPlayerPlugin.getInstance().isAllowToBindAudioService()) {
+        if (AzPlayerPlugin.Companion.getInstance().isAllowToBindAudioService()) {
             this.setupPlayer();
-            AzPlayerPlugin.getInstance().bindService();
+            AzPlayerPlugin.Companion.getInstance().bindService();
             this.player.seekToDefaultPosition(currentPosition);
         }
     }
@@ -308,7 +308,7 @@ public class PlayerService {
     protected void stop() {
 
         this.player.stop();
-        AzPlayerPlugin.getInstance().unBoundService();
+        AzPlayerPlugin.Companion.getInstance().unBoundService();
     }
 
 
@@ -374,7 +374,7 @@ public class PlayerService {
                     initialView();
                     Log.i("player", "pause");
                 } else if (playbackState == Player.STATE_IDLE) {
-                    AzPlayerPlugin.getInstance().unBoundService();
+                    AzPlayerPlugin.Companion.getInstance().unBoundService();
                     Log.i("player", "stop");
                 }
             }
