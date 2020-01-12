@@ -1,3 +1,7 @@
+## 0.0.12
+
+* Fix some issue
+
 ## 0.0.11
 
 * Add header for kotlin register to java plugin
