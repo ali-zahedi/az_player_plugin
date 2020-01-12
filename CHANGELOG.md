@@ -1,3 +1,7 @@
+## 0.0.11
+
+* Add header for kotlin register to java plugin
+
 ## 0.0.10
 
 * Fix run on ios 13

@@ -183,6 +183,7 @@ class AzPlayerPlugin private constructor(private val registrar: Registrar) : Met
         @Volatile
         private var instance: AzPlayerPlugin? = null
 
+        @JvmStatic
         fun registerWith(registrar: Registrar) {
             val channel = MethodChannel(registrar.messenger(), "az_player_plugin")
             channel.setMethodCallHandler(AzPlayerPlugin.getInstance(registrar))
