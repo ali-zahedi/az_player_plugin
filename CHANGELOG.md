@@ -1,3 +1,7 @@
+## 0.0.10
+
+* Fix run on ios 13
+
 ## 0.0.9
 
 * Convert main android file to kotlin
