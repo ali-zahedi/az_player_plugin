@@ -25,6 +25,7 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.LoopingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
@@ -71,9 +72,8 @@ public class PlayerService {
         this.setupPlayer();
     }
 
-    public Bitmap getCurrentImage()
-    {
-        if (currentImage ==null) return  null;
+    public Bitmap getCurrentImage() {
+        if (currentImage == null) return null;
         return currentImage.getBitmap();
     }
 
@@ -126,7 +126,7 @@ public class PlayerService {
             Drawable d = null;
             try {
                 d = Drawable.createFromStream(context.getAssets().open(imagePlaceHolderPath), null);
-                currentImage = (BitmapDrawable)d;
+                currentImage = (BitmapDrawable) d;
             } catch (Exception e) {
             }
 
@@ -151,13 +151,13 @@ public class PlayerService {
         playerView.invalidate();
     }
 
-    private void applySizeScreen(){
+    private void applySizeScreen() {
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) width, (int) height);
-        if(imageView != null)
+        if (imageView != null)
             imageView.setLayoutParams(params);
-        if(surfaceView != null)
+        if (surfaceView != null)
             surfaceView.setLayoutParams(params);
-        if(playerView != null)
+        if (playerView != null)
             playerView.setLayoutParams(params);
     }
 
@@ -279,6 +279,27 @@ public class PlayerService {
         concatenatingMediaSource.clear();
         files.clear();
         this.player.prepare(concatenatingMediaSource);
+    }
+
+    protected void setPlayMode(PlayModeEnum mode) {
+        switch (mode) {
+            case SHUFFLE:
+                this.player.setShuffleModeEnabled(true);
+                this.player.setRepeatMode(Player.REPEAT_MODE_OFF);
+                break;
+            case REPEAT_ALL:
+                this.player.setShuffleModeEnabled(false);
+                this.player.setRepeatMode(Player.REPEAT_MODE_ALL);
+                break;
+            case REPEAT_ONE:
+                this.player.setShuffleModeEnabled(false);
+                this.player.setRepeatMode(Player.REPEAT_MODE_ONE);
+                break;
+            case OFF:
+                this.player.setShuffleModeEnabled(false);
+                this.player.setRepeatMode(Player.REPEAT_MODE_OFF);
+                break;
+        }
     }
 
     protected void fastForward() {
@@ -404,6 +425,7 @@ public class PlayerService {
             }
 
             MediaSource mediaSource = buildMediaSource(uri, dataSourceFactory, context);
+
             concatenatingMediaSource.addMediaSource(mediaSource);
         }
         if (!isPlaying())
