@@ -141,7 +141,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   
     AZPlayerPlugin.AzPlayerPlugin().setImagePlaceHolder('assets/logo.png');
-  
+
+    AZPlayerPlugin.AzPlayerPlugin().setRepeatMode(AZPlayerPlugin.PlayMode.REPEAT_ONE);
     AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(files);
     Future.delayed(Duration(seconds: seconds)).then((elem) async {
 //      print("play: ${await AZPlayerPlugin.AzPlayerPlugin().play()}");

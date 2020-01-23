@@ -1,0 +1,6 @@
+enum PlayMode{
+	SHUFFLE,
+	REPEAT_ALL,
+	REPEAT_ONE,
+	OFF,
+}
