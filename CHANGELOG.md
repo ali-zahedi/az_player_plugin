@@ -1,3 +1,7 @@
+## 0.1.1
+
+* Support play mode (shuffle, repeat all, repeat once, none) 
+
 ## 0.0.12
 
 * Fix some issue
