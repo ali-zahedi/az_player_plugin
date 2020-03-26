@@ -10,6 +10,7 @@ class PlayerScreenExample extends StatefulWidget {
 
 class _PlayerScreenExampleState extends State<PlayerScreenExample> {
   List<AZPlayerPlugin.File> _items = [];
+  Widget _playerView = Container();
 
   @override
   void initState() {
@@ -20,6 +21,8 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
   @override
   void dispose() {
     super.dispose();
+    AZPlayerPlugin.AzPlayerPlugin().removeListenerPlayerInfo(_onPlayerInfoChangeReceived);
+    AZPlayerPlugin.AzPlayerPlugin().removeListenerPlayerScreen(_onPlayerScreenChangeReceived);
   }
 
   @override
@@ -113,10 +116,17 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
     // set placeholder
     AZPlayerPlugin.AzPlayerPlugin().setImagePlaceHolder('assets/logo.png');
     // set repeat mode
-    AZPlayerPlugin.AzPlayerPlugin().setRepeatMode(AZPlayerPlugin.PlayMode.REPEAT_ALL);
+    AZPlayerPlugin.AzPlayerPlugin()
+        .setRepeatMode(AZPlayerPlugin.PlayMode.REPEAT_ALL);
     // add files to play list
     AZPlayerPlugin.AzPlayerPlugin().addFilesToPlayList(this._items);
+    // set state
     setState(() {});
+    // add callback
+    AZPlayerPlugin.AzPlayerPlugin()
+        .addListenerPlayerScreen(_onPlayerScreenChangeReceived);
+    AZPlayerPlugin.AzPlayerPlugin()
+        .addListenerPlayerInfo(_onPlayerInfoChangeReceived);
   }
 
   Widget _getTile(BuildContext context, AZPlayerPlugin.File item) {
@@ -156,15 +166,39 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: AZPlayerPlugin.AzPlayerPlugin().getPlayerView(
-                context: context,
-                width: 100,
-                height: 100,
-              ),
+              child: this._playerView,
             ),
           ],
         ),
       );
     });
+  }
+
+  /// ----------------------------------------------------------
+  /// handler for receive trigger PlayerScreen
+  /// ----------------------------------------------------------
+  void _onPlayerScreenChangeReceived(AZPlayerPlugin.InterfaceFile currentFile) {
+    print("chage screen");
+    setState(() {
+      this._playerView = AZPlayerPlugin.AzPlayerPlugin().getPlayerView(
+        context: context,
+        width: 100,
+        height: 100,
+      );
+    });
+  }
+
+  void _onPlayerInfoChangeReceived(
+    AZPlayerPlugin.InterfaceFile currentFile,
+    bool isPlaying,
+    num duration,
+    num secondsLeft,
+    num currentTime,
+  ) {
+    print("pk:" + currentFile.pk.toString());
+    print("is playing:" + isPlaying.toString());
+    print("duration: " + duration.toString());
+    print("secondsLeft: " + secondsLeft.toString());
+    print("current time: " + currentTime.toString());
   }
 }

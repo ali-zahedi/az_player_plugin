@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Add Controller for player screen, time and etc.
+
 ## 0.1.11
 
 * Fix freeze video screen when mp3 file play in android
