@@ -112,6 +112,6 @@ See [here](example/README.md) for usage.
 
 - [ ] fast backward in iOS
 
-- [ ] handle update client. like call back or interval for update timer, slider, play/pause button in framework.
+- [x] handle update client. like call back or interval for update timer, slider, play/pause button in framework.
 
 ## Please rate/star and contribute if you find it helpfull.

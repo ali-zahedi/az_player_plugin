@@ -10,13 +10,18 @@ class AzPlayerPlugin implements InterfacePlayer {
   static AzPlayerPlugin _instance = AzPlayerPlugin._();
   final MethodChannel _channel = const MethodChannel('az_player_plugin');
 
-  AzPlayerPlugin._();
+  AzPlayerPlugin._() {
+    this._startTimer();
+  }
 
   factory AzPlayerPlugin() {
     return AzPlayerPlugin._instance;
   }
 
   LinkedHashSet<File> _files = new LinkedHashSet<File>();
+  Timer _timer;
+  bool _lastTimeIsPlaying = false;
+  InterfaceFile _lastCurrentFile;
 
   @override
   Future<InterfaceFile> get currentFile async {
@@ -57,12 +62,15 @@ class AzPlayerPlugin implements InterfacePlayer {
 
   @override
   Widget getPlayerView(
-      {@required BuildContext context, num width = 0, num height = 0, bool isProtectAspectRation = true}) {
+      {@required BuildContext context,
+      num width = 0,
+      num height = 0,
+      bool isProtectAspectRation = true}) {
     assert(context != null);
     assert(width != null);
     assert(height != null);
     assert(isProtectAspectRation != null);
-    
+
     Map<String, String> creationParams = {};
 
     double w = width.toDouble();
@@ -101,7 +109,7 @@ class AzPlayerPlugin implements InterfacePlayer {
     size['width'] = w * _calculatePixelRatio(context);
     size['height'] = h * _calculatePixelRatio(context);
     _channel.invokeMethod('changeScreenSize', size);
-    
+
     return Container(
       width: width.toDouble(),
       height: height.toDouble(),
@@ -132,7 +140,6 @@ class AzPlayerPlugin implements InterfacePlayer {
     });
     final bool result =
         await _channel.invokeMethod('addFilesToPlayList', filesJson);
-    ;
     return result;
   }
 
@@ -202,7 +209,8 @@ class AzPlayerPlugin implements InterfacePlayer {
 
   @override
   Future<bool> setRepeatMode(PlayMode mode) async {
-    final bool result = await _channel.invokeMethod('setRepeatMode', mode.toString());
+    final bool result =
+        await _channel.invokeMethod('setRepeatMode', mode.toString());
     return result;
   }
 
@@ -226,8 +234,107 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   // calculate size
-  double _calculatePixelRatio(BuildContext context){
+  double _calculatePixelRatio(BuildContext context) {
     MediaQueryData queryData = MediaQuery.of(context);
     return Platform.isAndroid ? queryData.devicePixelRatio : 1.0;
+  }
+
+  ///
+  /// Listeners
+  /// List of methods to be called when a trigger
+  /// comes in.
+  ///
+  @override
+  ObserverList<Function(InterfaceFile currentFile)> listenersPlayerScreen =
+      new ObserverList<Function(InterfaceFile currentFile)>();
+
+  @override
+  ObserverList<ListenerPlayerInfoFunction> listenersPlayerInfo =
+      new ObserverList<ListenerPlayerInfoFunction>();
+
+  /// ---------------------------------------------------------
+  /// Adds a callback to be invoked in case of incoming
+  /// Player screen
+  /// ---------------------------------------------------------
+  @override
+  addListenerPlayerScreen(Function(InterfaceFile currentFile) callback) {
+    this.listenersPlayerScreen.add(callback);
+  }
+
+  @override
+  removeListenerPlayerScreen(Function(InterfaceFile currentFile) callback) {
+    this.listenersPlayerScreen.remove(callback);
+  }
+
+  /// ---------------------------------------------------------
+  /// Adds a callback to be invoked in case of incoming
+  /// Player info
+  /// ---------------------------------------------------------
+  @override
+  addListenerPlayerInfo(ListenerPlayerInfoFunction callback) {
+    this.listenersPlayerInfo.add(callback);
+  }
+
+  @override
+  removeListenerPlayerInfo(ListenerPlayerInfoFunction callback) {
+    this.listenersPlayerInfo.remove(callback);
+  }
+
+  /// ----------------------------------------------------------
+  /// Callback which is invoked each time that we are receiving
+  /// a trigger
+  /// ----------------------------------------------------------
+  _onReceptionOfTriggerPlayerScreen(InterfaceFile currentFile) {
+    this
+        .listenersPlayerScreen
+        .forEach((Function(InterfaceFile currentFile) callback) {
+      callback(currentFile);
+    });
+  }
+
+  _onReceptionOfTriggerPlayerInfo(
+    InterfaceFile currentFile,
+    bool isPlaying,
+    num duration,
+    num secondsLeft,
+    num currentTime,
+  ) {
+    this.listenersPlayerInfo.forEach((ListenerPlayerInfoFunction callback) {
+      callback(
+        currentFile,
+        isPlaying,
+        duration,
+        secondsLeft,
+        currentTime,
+      );
+    });
+  }
+
+  void _startTimer() {
+    const oneDecimal = const Duration(seconds: 1);
+    this._timer = new Timer.periodic(oneDecimal, (Timer timer) async {
+      bool isPlaying = await this.isPlaying;
+      if (_timer.isActive &&
+          (this._lastTimeIsPlaying != isPlaying || isPlaying)) {
+        this._lastTimeIsPlaying = isPlaying;
+        InterfaceFile currentFile = await this.currentFile;
+        num duration = await this.duration;
+        num secondsLeft = await this.secondsLeft;
+        num currentTime = await this.currentTime;
+
+        this._onReceptionOfTriggerPlayerInfo(
+          currentFile,
+          isPlaying,
+          duration,
+          secondsLeft,
+          currentTime,
+        );
+
+        if(_lastCurrentFile != currentFile){
+          this._lastCurrentFile = currentFile;
+          this._onReceptionOfTriggerPlayerScreen(currentFile);
+        }
+      }
+    });
   }
 }
