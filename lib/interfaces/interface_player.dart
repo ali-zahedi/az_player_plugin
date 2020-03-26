@@ -26,10 +26,11 @@ abstract class InterfacePlayer {
   // در حال پخش بودن
   Future<bool> get isPlaying;
 
+  Widget playerView;
+
   // 16x9
-  Widget getPlayerView(
-      {@required BuildContext context,
-      num width = 0,
+  void setPlayerView(
+      {num width = 0,
       num height = 0,
       bool isProtectAspectRation = true});
 

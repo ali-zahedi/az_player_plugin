@@ -10,7 +10,6 @@ class PlayerScreenExample extends StatefulWidget {
 
 class _PlayerScreenExampleState extends State<PlayerScreenExample> {
   List<AZPlayerPlugin.File> _items = [];
-  Widget _playerView = Container();
 
   @override
   void initState() {
@@ -21,8 +20,10 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
   @override
   void dispose() {
     super.dispose();
-    AZPlayerPlugin.AzPlayerPlugin().removeListenerPlayerInfo(_onPlayerInfoChangeReceived);
-    AZPlayerPlugin.AzPlayerPlugin().removeListenerPlayerScreen(_onPlayerScreenChangeReceived);
+    AZPlayerPlugin.AzPlayerPlugin()
+        .removeListenerPlayerInfo(_onPlayerInfoChangeReceived);
+    AZPlayerPlugin.AzPlayerPlugin()
+        .removeListenerPlayerScreen(_onPlayerScreenChangeReceived);
   }
 
   @override
@@ -127,6 +128,11 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
         .addListenerPlayerScreen(_onPlayerScreenChangeReceived);
     AZPlayerPlugin.AzPlayerPlugin()
         .addListenerPlayerInfo(_onPlayerInfoChangeReceived);
+
+    AZPlayerPlugin.AzPlayerPlugin().setPlayerView(
+      width: 100,
+      height: 100,
+    );
   }
 
   Widget _getTile(BuildContext context, AZPlayerPlugin.File item) {
@@ -166,7 +172,7 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: this._playerView,
+              child: AZPlayerPlugin.AzPlayerPlugin().playerView,
             ),
           ],
         ),
@@ -180,11 +186,7 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
   void _onPlayerScreenChangeReceived(AZPlayerPlugin.InterfaceFile currentFile) {
     print("chage screen");
     setState(() {
-      this._playerView = AZPlayerPlugin.AzPlayerPlugin().getPlayerView(
-        context: context,
-        width: 100,
-        height: 100,
-      );
+
     });
   }
 
