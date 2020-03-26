@@ -201,6 +201,12 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   @override
+  Future<bool> setRepeatMode(PlayMode mode) async {
+    final bool result = await _channel.invokeMethod('setRepeatMode', mode.toString());
+    return result;
+  }
+
+  @override
   Future<bool> fastBackward() async {
     final bool result = await _channel.invokeMethod('fastBackward');
     return result;
