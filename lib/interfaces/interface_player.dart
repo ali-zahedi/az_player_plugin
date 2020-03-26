@@ -26,8 +26,10 @@ abstract class InterfacePlayer{
 	Future<bool> playWithFile(InterfaceFile file);
 	
 	Future<bool> pause();
-	
+
 	Future<bool> stop();
+
+	Future<bool> setRepeatMode(PlayMode mode);
 
 	Future<bool> fastForward();
 

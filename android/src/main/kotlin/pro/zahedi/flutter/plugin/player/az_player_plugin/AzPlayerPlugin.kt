@@ -147,6 +147,10 @@ class AzPlayerPlugin private constructor(private val registrar: Registrar) : Met
                 PlayerService.getInstance().changeCurrentTime(java.lang.Double.parseDouble(call.arguments.toString()))
                 result.success(true)
             }
+            "setRepeatMode" -> {
+                PlayerService.getInstance().setPlayMode(PlayModeEnum.mode(call.arguments.toString()))
+                result.success(true)
+            }
             "changeScreenSize" -> {
                 val sizeJson = call.arguments as Map<String, Any>
                 val width = java.lang.Double.parseDouble(sizeJson["width"].toString())
