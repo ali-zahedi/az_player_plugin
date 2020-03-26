@@ -355,7 +355,7 @@ public class PlayerService {
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
+                initialView();
             }
 
             @Override
