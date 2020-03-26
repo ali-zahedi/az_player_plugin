@@ -6,6 +6,9 @@ This plugin handle background mode playing, for music and video.
 
 Add notification player in notification center and lock screen. Support both android/iOS.
 
+Support Repeat and shuffle mode.
+
+
 ## Getting Started
 
 This project is a starting point for a Flutter

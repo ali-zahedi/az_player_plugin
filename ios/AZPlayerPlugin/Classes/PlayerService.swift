@@ -362,15 +362,15 @@ class PlayerService: NSObject{
             self.player?.pause()
             self.player?.seek(to: CMTime.zero)
             self.player?.play()
-        case .none, .all:
+        case .all:
             
             self.playNext()
         case .shuffle:
             let random = Int(arc4random_uniform((UInt32(self.files.count - 1))))
             self.play(self.files[random])
+        case .none:
+            self.player?.pause()
         }
-        
-        
     }
     
     // Fileprivat Stop

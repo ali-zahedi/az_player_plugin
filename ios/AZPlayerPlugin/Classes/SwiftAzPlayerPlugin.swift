@@ -133,6 +133,26 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
             return
         }
         PlayerView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+    }else if(call.method == "setRepeatMode"){
+
+        let repeatMode: String? = call.arguments as? String
+        if let rm = repeatMode {
+            if(rm == "PlayMode.SHUFFLE"){
+                PlayerService.shared.looptype = .shuffle
+            }else if(rm == "PlayMode.REPEAT_ALL"){
+                PlayerService.shared.looptype = .all
+            }else if(rm == "PlayMode.REPEAT_ONE"){
+                PlayerService.shared.looptype = .one
+            }else if(rm == "PlayMode.OFF"){
+                PlayerService.shared.looptype = .none
+            }
+            else{
+                PlayerService.shared.looptype = .none
+            }
+            result(true)
+        }else{
+            result(false)
+        }
     }
   }
     

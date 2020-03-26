@@ -148,7 +148,7 @@ class AzPlayerPlugin private constructor(private val registrar: Registrar) : Met
                 result.success(true)
             }
             "setRepeatMode" -> {
-                PlayerService.getInstance().setPlayMode(PlayModeEnum.mode(call.arguments.toString()))
+                PlayerService.getInstance().setPlayMode(PlayModeEnum.mode(call.arguments.toString().removePrefix("PlayMode.")))
                 result.success(true)
             }
             "changeScreenSize" -> {
