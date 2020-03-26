@@ -1,3 +1,7 @@
+## 0.1.11
+
+* Fix freeze video screen when mp3 file play in android
+
 ## 0.1.1
 
 * Support play mode (shuffle, repeat all, repeat once, none) 
