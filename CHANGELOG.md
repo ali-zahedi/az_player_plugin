@@ -1,3 +1,7 @@
+## 0.2.11
+
+* Deprecate get player view 
+
 ## 0.2.1
 
 * Add Controller for player screen, time and etc.

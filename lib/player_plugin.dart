@@ -17,8 +17,12 @@ class AzPlayerPlugin implements InterfacePlayer {
   factory AzPlayerPlugin() {
     return AzPlayerPlugin._instance;
   }
+  @override
+  Widget playerView;
 
   LinkedHashSet<File> _files = new LinkedHashSet<File>();
+  num _width=10;
+  num _height=10;
   Timer _timer;
   bool _lastTimeIsPlaying = false;
   InterfaceFile _lastCurrentFile;
@@ -61,15 +65,12 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   @override
-  Widget getPlayerView(
-      {@required BuildContext context,
-      num width = 0,
-      num height = 0,
-      bool isProtectAspectRation = true}) {
-    assert(context != null);
+  void setPlayerView({num width = 0, num height = 0, bool isProtectAspectRation = true}) {
     assert(width != null);
     assert(height != null);
     assert(isProtectAspectRation != null);
+    this._width = width;
+    this._height = height;
 
     Map<String, String> creationParams = {};
 
@@ -105,21 +106,24 @@ class AzPlayerPlugin implements InterfacePlayer {
       playerView = Container();
     }
 
-    Map<String, dynamic> size = Map();
-    size['width'] = w * _calculatePixelRatio(context);
-    size['height'] = h * _calculatePixelRatio(context);
-    _channel.invokeMethod('changeScreenSize', size);
-
-    return Container(
-      width: width.toDouble(),
-      height: height.toDouble(),
-      child: Center(
-        child: Container(
-          width: w,
-          height: h,
-          child: playerView,
-        ),
-      ),
+    this.playerView = Builder(
+        builder: (BuildContext context) {
+          Map<String, dynamic> size = Map();
+          size['width'] = w * _calculatePixelRatio(context);
+          size['height'] = h * _calculatePixelRatio(context);
+          _channel.invokeMethod('changeScreenSize', size);
+          return Container(
+            width: width.toDouble(),
+            height: height.toDouble(),
+            child: Center(
+              child: Container(
+                width: w,
+                height: h,
+                child: playerView,
+              ),
+            ),
+          );
+        },
     );
   }
 
@@ -285,6 +289,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   /// a trigger
   /// ----------------------------------------------------------
   _onReceptionOfTriggerPlayerScreen(InterfaceFile currentFile) {
+    this.setPlayerView(width: this._width, height: this._height,);
     this
         .listenersPlayerScreen
         .forEach((Function(InterfaceFile currentFile) callback) {
