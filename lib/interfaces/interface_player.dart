@@ -29,10 +29,11 @@ abstract class InterfacePlayer {
   Widget playerView;
 
   // 16x9
-  void setPlayerView(
-      {num width = 0,
-      num height = 0,
-      bool isProtectAspectRation = true});
+  void setPlayerView({
+    num width = 0,
+    num height = 0,
+    bool isProtectAspectRation = true,
+  });
 
   Future<bool> play();
 
@@ -75,16 +76,17 @@ abstract class InterfacePlayer {
   /// List of methods to be called when a trigger
   /// comes in.
   ///
-  ObserverList<Function(InterfaceFile currentFile)> listenersPlayerScreen;
+  ObserverList<Function(Widget playerView)> listenersPlayerScreen;
+
   ObserverList<ListenerPlayerInfoFunction> listenersPlayerInfo;
 
   /// ---------------------------------------------------------
   /// Adds a callback to be invoked in case of incoming
   /// Player screen
   /// ---------------------------------------------------------
-  addListenerPlayerScreen(Function(InterfaceFile currentFile) callback);
+  void addListenerPlayerScreen(Function(Widget playerView) callback);
 
-  removeListenerPlayerScreen(Function(InterfaceFile currentFile) callback);
+  void removeListenerPlayerScreen(Function(Widget playerView) callback);
 
   /// ---------------------------------------------------------
   /// Adds a callback to be invoked in case of incoming
