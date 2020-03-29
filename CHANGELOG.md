@@ -1,3 +1,7 @@
+## 0.2.16
+
+* Fix size first time on android
+
 ## 0.2.15
 
 * Remove delay for change the screen size
