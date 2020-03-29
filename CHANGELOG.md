@@ -1,3 +1,23 @@
+## 0.2.16
+
+* Fix size first time on android
+
+## 0.2.15
+
+* Remove delay for change the screen size
+
+## 0.2.14
+
+* Controller for player view
+
+## 0.2.13
+
+* Waiting for changing video size screen
+
+## 0.2.12
+
+* Lazy change view size 
+
 ## 0.2.11
 
 * Deprecate get player view 

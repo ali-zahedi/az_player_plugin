@@ -65,52 +65,58 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   @override
-  void setPlayerView({num width = 0, num height = 0, bool isProtectAspectRation = true}) {
+  void setPlayerView({num width = 0, num height = 0, bool isProtectAspectRation = true}) async{
     assert(width != null);
     assert(height != null);
     assert(isProtectAspectRation != null);
+
+    if(width == this._width && height == this._height){
+      return;
+    }
+
     this._width = width;
     this._height = height;
 
-    Map<String, String> creationParams = {};
 
-    double w = width.toDouble();
-    double h = height.toDouble();
-    double division = (w / 16) / (h / 9);
 
-    if (division >= 1) {
-      // the width bigger than height
-      w = w / division;
-    } else {
-      // the height bigger than width
-      h = h * division;
-    }
-    creationParams['width'] = w.toString();
-    creationParams['height'] = h.toString();
 
-    Widget playerView;
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      playerView = AndroidView(
-        viewType: 'PlayerView',
-        creationParams: creationParams,
-        creationParamsCodec: StandardMessageCodec(),
-      );
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      playerView = UiKitView(
-        viewType: 'PlayerView',
-        creationParams: creationParams,
-        creationParamsCodec: StandardMessageCodec(),
-      );
-    } else {
-      playerView = Container();
-    }
 
     this.playerView = Builder(
         builder: (BuildContext context) {
+          Widget playerView;
+
+          double w = width.toDouble();
+          double h = height.toDouble();
+          double division = (w / 16) / (h / 9);
+
+          if (division >= 1) {
+            // the width bigger than height
+            w = w / division;
+          } else {
+            // the height bigger than width
+            h = h * division;
+          }
+
           Map<String, dynamic> size = Map();
           size['width'] = w * _calculatePixelRatio(context);
           size['height'] = h * _calculatePixelRatio(context);
+
+          if (defaultTargetPlatform == TargetPlatform.android) {
+            playerView = AndroidView(
+              viewType: 'PlayerView',
+              creationParams: size,
+              creationParamsCodec: StandardMessageCodec(),
+            );
+          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+            playerView = UiKitView(
+              viewType: 'PlayerView',
+              creationParams: size,
+              creationParamsCodec: StandardMessageCodec(),
+            );
+          } else {
+            playerView = Container();
+          }
+
           _channel.invokeMethod('changeScreenSize', size);
           return Container(
             width: width.toDouble(),
@@ -125,6 +131,7 @@ class AzPlayerPlugin implements InterfacePlayer {
           );
         },
     );
+    this._onReceptionOfTriggerPlayerScreen(this.playerView);
   }
 
   @override
@@ -249,8 +256,8 @@ class AzPlayerPlugin implements InterfacePlayer {
   /// comes in.
   ///
   @override
-  ObserverList<Function(InterfaceFile currentFile)> listenersPlayerScreen =
-      new ObserverList<Function(InterfaceFile currentFile)>();
+  ObserverList<Function(Widget playerView)> listenersPlayerScreen =
+      new ObserverList<Function(Widget playerView)>();
 
   @override
   ObserverList<ListenerPlayerInfoFunction> listenersPlayerInfo =
@@ -261,12 +268,12 @@ class AzPlayerPlugin implements InterfacePlayer {
   /// Player screen
   /// ---------------------------------------------------------
   @override
-  addListenerPlayerScreen(Function(InterfaceFile currentFile) callback) {
+  void addListenerPlayerScreen(Function(Widget playerView) callback) {
     this.listenersPlayerScreen.add(callback);
   }
 
   @override
-  removeListenerPlayerScreen(Function(InterfaceFile currentFile) callback) {
+  void removeListenerPlayerScreen(Function(Widget playerView) callback) {
     this.listenersPlayerScreen.remove(callback);
   }
 
@@ -275,12 +282,12 @@ class AzPlayerPlugin implements InterfacePlayer {
   /// Player info
   /// ---------------------------------------------------------
   @override
-  addListenerPlayerInfo(ListenerPlayerInfoFunction callback) {
+  void addListenerPlayerInfo(ListenerPlayerInfoFunction callback) {
     this.listenersPlayerInfo.add(callback);
   }
 
   @override
-  removeListenerPlayerInfo(ListenerPlayerInfoFunction callback) {
+  void removeListenerPlayerInfo(ListenerPlayerInfoFunction callback) {
     this.listenersPlayerInfo.remove(callback);
   }
 
@@ -288,16 +295,15 @@ class AzPlayerPlugin implements InterfacePlayer {
   /// Callback which is invoked each time that we are receiving
   /// a trigger
   /// ----------------------------------------------------------
-  _onReceptionOfTriggerPlayerScreen(InterfaceFile currentFile) {
-    this.setPlayerView(width: this._width, height: this._height,);
+  void _onReceptionOfTriggerPlayerScreen(Widget playerView) {
     this
         .listenersPlayerScreen
-        .forEach((Function(InterfaceFile currentFile) callback) {
-      callback(currentFile);
+        .forEach((Function(Widget playerView) callback) {
+      callback(playerView);
     });
   }
 
-  _onReceptionOfTriggerPlayerInfo(
+  void _onReceptionOfTriggerPlayerInfo(
     InterfaceFile currentFile,
     bool isPlaying,
     num duration,
@@ -337,7 +343,7 @@ class AzPlayerPlugin implements InterfacePlayer {
 
         if(_lastCurrentFile != currentFile){
           this._lastCurrentFile = currentFile;
-          this._onReceptionOfTriggerPlayerScreen(currentFile);
+          this._onReceptionOfTriggerPlayerScreen(this.playerView);
         }
       }
     });

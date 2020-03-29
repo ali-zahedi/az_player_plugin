@@ -183,7 +183,7 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
   /// ----------------------------------------------------------
   /// handler for receive trigger PlayerScreen
   /// ----------------------------------------------------------
-  void _onPlayerScreenChangeReceived(AZPlayerPlugin.InterfaceFile currentFile) {
+  void _onPlayerScreenChangeReceived(Widget playerView) {
     print("chage screen");
     setState(() {
 
