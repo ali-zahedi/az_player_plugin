@@ -77,45 +77,46 @@ class AzPlayerPlugin implements InterfacePlayer {
     this._width = width;
     this._height = height;
 
-    Map<String, String> creationParams = {};
 
-    double w = width.toDouble();
-    double h = height.toDouble();
-    double division = (w / 16) / (h / 9);
 
-    if (division >= 1) {
-      // the width bigger than height
-      w = w / division;
-    } else {
-      // the height bigger than width
-      h = h * division;
-    }
-    creationParams['width'] = w.toString();
-    creationParams['height'] = h.toString();
 
-    Widget playerView;
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      playerView = AndroidView(
-        viewType: 'PlayerView',
-        creationParams: creationParams,
-        creationParamsCodec: StandardMessageCodec(),
-      );
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      playerView = UiKitView(
-        viewType: 'PlayerView',
-        creationParams: creationParams,
-        creationParamsCodec: StandardMessageCodec(),
-      );
-    } else {
-      playerView = Container();
-    }
 
     this.playerView = Builder(
         builder: (BuildContext context) {
+          Widget playerView;
+
+          double w = width.toDouble();
+          double h = height.toDouble();
+          double division = (w / 16) / (h / 9);
+
+          if (division >= 1) {
+            // the width bigger than height
+            w = w / division;
+          } else {
+            // the height bigger than width
+            h = h * division;
+          }
+
           Map<String, dynamic> size = Map();
           size['width'] = w * _calculatePixelRatio(context);
           size['height'] = h * _calculatePixelRatio(context);
+
+          if (defaultTargetPlatform == TargetPlatform.android) {
+            playerView = AndroidView(
+              viewType: 'PlayerView',
+              creationParams: size,
+              creationParamsCodec: StandardMessageCodec(),
+            );
+          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+            playerView = UiKitView(
+              viewType: 'PlayerView',
+              creationParams: size,
+              creationParamsCodec: StandardMessageCodec(),
+            );
+          } else {
+            playerView = Container();
+          }
+
           _channel.invokeMethod('changeScreenSize', size);
           return Container(
             width: width.toDouble(),
