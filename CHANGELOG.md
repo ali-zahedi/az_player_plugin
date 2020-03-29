@@ -1,3 +1,7 @@
+## 0.2.17
+
+* Upgrade ExoPlayer 2.11.3
+
 ## 0.2.16
 
 * Fix size first time on android

@@ -27,6 +27,7 @@ import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.LoopingMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.smoothstreaming.DefaultSsChunkSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
@@ -67,8 +68,8 @@ public class PlayerService {
     private PlayerService(Context context) {
         this.context = context;
         concatenatingMediaSource = new ConcatenatingMediaSource();
-        TrackSelector trackSelector = new DefaultTrackSelector();
-        this.player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        TrackSelector trackSelector = new DefaultTrackSelector(context);
+        this.player = new SimpleExoPlayer.Builder(context).setTrackSelector(trackSelector).build();
         this.setupPlayer();
     }
 
@@ -439,8 +440,7 @@ public class PlayerService {
                 return new SsMediaSource.Factory(new DefaultSsChunkSource.Factory(mediaDataSourceFactory),
                         new DefaultDataSourceFactory(context, null, mediaDataSourceFactory)).createMediaSource(uri);
             case C.TYPE_OTHER:
-                return new ExtractorMediaSource.Factory(mediaDataSourceFactory)
-                        .setExtractorsFactory(new DefaultExtractorsFactory()).createMediaSource(uri);
+                return new ProgressiveMediaSource.Factory(mediaDataSourceFactory).createMediaSource(uri);
             default: {
                 throw new IllegalStateException("Unsupported type: " + type);
             }
