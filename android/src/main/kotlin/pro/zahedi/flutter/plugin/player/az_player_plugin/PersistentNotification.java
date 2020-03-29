@@ -24,8 +24,6 @@ import static pro.zahedi.flutter.plugin.player.az_player_plugin.C.PLAYBACK_NOTIF
 class PersistentNotification {
     private Service service;
     private PlayerNotificationManager playerNotificationManager;
-    private MediaSessionCompat mediaSession;
-    private MediaSessionConnector mediaSessionConnector;
     private PlayerService playerService;
 
     PersistentNotification(Service service, PlayerService playerService) {
@@ -42,13 +40,13 @@ class PersistentNotification {
     @SuppressLint("WrongConstant")
     void createNotification() {
         playerNotificationManager = PlayerNotificationManager.createWithNotificationChannel(service,
-                PLAYBACK_CHANNEL_ID, R.string.playback_channel_name, PLAYBACK_NOTIFICATION_ID,
-                new MyMediaDescriptionAdapter());
+                PLAYBACK_CHANNEL_ID, R.string.playback_channel_name,R.string.playback_channel_description, PLAYBACK_NOTIFICATION_ID,
+                new MyMediaDescriptionAdapter(),new MyNotificationListener());
 
-        playerNotificationManager.setNotificationListener(new MyNotificationListener());
         playerNotificationManager.setPlayer(playerService.getPlayer());
         playerNotificationManager.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         playerNotificationManager.setUseNavigationActions(false);
+        playerNotificationManager.setUseStopAction(true);
     }
 
     private class MyMediaDescriptionAdapter implements MediaDescriptionAdapter {
@@ -83,15 +81,15 @@ class PersistentNotification {
     }
 
     class MyNotificationListener implements NotificationListener {
-
         @Override
-        public void onNotificationStarted(int notificationId, Notification notification) {
+        public void onNotificationPosted(int notificationId, Notification notification, boolean ongoing) {
             service.startForeground(notificationId, notification);
         }
 
         @Override
-        public void onNotificationCancelled(int notificationId) {
+        public void onNotificationCancelled(int notificationId, boolean dismissedByUser) {
             service.stopSelf();
         }
+
     }
 }
