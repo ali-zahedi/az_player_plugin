@@ -163,7 +163,7 @@ class PlayerService: NSObject{
             self.commandCenter.changePlaybackPositionCommand.isEnabled = true
             self.commandCenter.changePlaybackPositionCommand.addTarget{ [unowned self] event in
                 if let e = event as? MPChangePlaybackPositionCommandEvent{
-                    self.changedThumbSliderOnLockScreen(e)
+                    _ = self.changedThumbSliderOnLockScreen(e)
                 return .success
                 }
                 return .commandFailed

@@ -77,59 +77,55 @@ class AzPlayerPlugin implements InterfacePlayer {
     this._width = width;
     this._height = height;
 
-
-
-
-
     this.playerView = Builder(
-        builder: (BuildContext context) {
-          Widget playerView;
+      builder: (BuildContext context) {
+        Widget playerView;
 
-          double w = width.toDouble();
-          double h = height.toDouble();
-          double division = (w / 16) / (h / 9);
+        double w = width.toDouble();
+        double h = height.toDouble();
+        double division = (w / 16) / (h / 9);
 
-          if (division >= 1) {
-            // the width bigger than height
-            w = w / division;
-          } else {
-            // the height bigger than width
-            h = h * division;
-          }
+        if (division >= 1) {
+          // the width bigger than height
+          w = w / division;
+        } else {
+          // the height bigger than width
+          h = h * division;
+        }
 
-          Map<String, dynamic> size = Map();
-          size['width'] = w * _calculatePixelRatio(context);
-          size['height'] = h * _calculatePixelRatio(context);
+        Map<String, String> size = Map();
+        size['width'] = (w * _calculatePixelRatio(context)).toString();
+        size['height'] = (h * _calculatePixelRatio(context)).toString();
 
-          if (defaultTargetPlatform == TargetPlatform.android) {
-            playerView = AndroidView(
-              viewType: 'PlayerView',
-              creationParams: size,
-              creationParamsCodec: StandardMessageCodec(),
-            );
-          } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-            playerView = UiKitView(
-              viewType: 'PlayerView',
-              creationParams: size,
-              creationParamsCodec: StandardMessageCodec(),
-            );
-          } else {
-            playerView = Container();
-          }
-
-          _channel.invokeMethod('changeScreenSize', size);
-          return Container(
-            width: width.toDouble(),
-            height: height.toDouble(),
-            child: Center(
-              child: Container(
-                width: w,
-                height: h,
-                child: playerView,
-              ),
-            ),
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          playerView = AndroidView(
+            viewType: 'PlayerView',
+            creationParams: size,
+            creationParamsCodec: StandardMessageCodec(),
           );
-        },
+        } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+          playerView = UiKitView(
+            viewType: 'PlayerView',
+            creationParams: size,
+            creationParamsCodec: StandardMessageCodec(),
+          );
+        } else {
+          playerView = Container();
+        }
+
+        _channel.invokeMethod('changeScreenSize', size);
+        return Container(
+          width: width.toDouble(),
+          height: height.toDouble(),
+          child: Center(
+            child: Container(
+              width: w,
+              height: h,
+              child: playerView,
+            ),
+          ),
+        );
+      },
     );
     this._onReceptionOfTriggerPlayerScreen(this.playerView);
   }
@@ -137,7 +133,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> addFileToPlayList(InterfaceFile file) async {
     final bool result =
-        await _channel.invokeMethod('addFileToPlayList', file.toJson());
+    await _channel.invokeMethod('addFileToPlayList', file.toJson());
     this._files.add(file);
     return result;
   }
@@ -150,7 +146,7 @@ class AzPlayerPlugin implements InterfacePlayer {
       this._files.add(elem);
     });
     final bool result =
-        await _channel.invokeMethod('addFilesToPlayList', filesJson);
+    await _channel.invokeMethod('addFilesToPlayList', filesJson);
     return result;
   }
 
@@ -194,7 +190,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   Future<bool> playWithFile(InterfaceFile file) async {
     this._files.add(file);
     final bool result =
-        await _channel.invokeMethod('playWithFile', file.toJson());
+    await _channel.invokeMethod('playWithFile', file.toJson());
     return result;
   }
 
@@ -207,7 +203,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> removeFromPlayList(InterfaceFile file) async {
     final bool result =
-        await _channel.invokeMethod('removeFromPlayList', file.toJson());
+    await _channel.invokeMethod('removeFromPlayList', file.toJson());
     this._files.removeWhere((value) => value.pk == file.pk);
     return result;
   }
@@ -221,7 +217,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> setRepeatMode(PlayMode mode) async {
     final bool result =
-        await _channel.invokeMethod('setRepeatMode', mode.toString());
+    await _channel.invokeMethod('setRepeatMode', mode.toString());
     return result;
   }
 
@@ -240,7 +236,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> setImagePlaceHolder(String path) async {
     final bool result =
-        await _channel.invokeMethod('setImagePlaceHolder', path);
+    await _channel.invokeMethod('setImagePlaceHolder', path);
     return result;
   }
 
@@ -257,11 +253,11 @@ class AzPlayerPlugin implements InterfacePlayer {
   ///
   @override
   ObserverList<Function(Widget playerView)> listenersPlayerScreen =
-      new ObserverList<Function(Widget playerView)>();
+  new ObserverList<Function(Widget playerView)>();
 
   @override
   ObserverList<ListenerPlayerInfoFunction> listenersPlayerInfo =
-      new ObserverList<ListenerPlayerInfoFunction>();
+  new ObserverList<ListenerPlayerInfoFunction>();
 
   /// ---------------------------------------------------------
   /// Adds a callback to be invoked in case of incoming
@@ -304,12 +300,12 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   void _onReceptionOfTriggerPlayerInfo(
-    InterfaceFile currentFile,
-    bool isPlaying,
-    num duration,
-    num secondsLeft,
-    num currentTime,
-  ) {
+      InterfaceFile currentFile,
+      bool isPlaying,
+      num duration,
+      num secondsLeft,
+      num currentTime,
+      ) {
     this.listenersPlayerInfo.forEach((ListenerPlayerInfoFunction callback) {
       callback(
         currentFile,
