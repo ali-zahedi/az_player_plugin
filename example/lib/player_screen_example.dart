@@ -10,6 +10,7 @@ class PlayerScreenExample extends StatefulWidget {
 
 class _PlayerScreenExampleState extends State<PlayerScreenExample> {
   List<AZPlayerPlugin.File> _items = [];
+  Widget _playerView = AZPlayerPlugin.AzPlayerPlugin().playerView;
 
   @override
   void initState() {
@@ -130,9 +131,16 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
         .addListenerPlayerInfo(_onPlayerInfoChangeReceived);
 
     AZPlayerPlugin.AzPlayerPlugin().setPlayerView(
-      width: 100,
-      height: 100,
+      width: 20,
+      height: 20,
     );
+
+    Future.delayed(Duration(seconds: 12)).then((value){
+      AZPlayerPlugin.AzPlayerPlugin().setPlayerView(
+        width: 150,
+        height: 150,
+      );
+    });
   }
 
   Widget _getTile(BuildContext context, AZPlayerPlugin.File item) {
@@ -172,7 +180,7 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: AZPlayerPlugin.AzPlayerPlugin().playerView,
+              child: this._playerView,
             ),
           ],
         ),
@@ -185,6 +193,7 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
   /// ----------------------------------------------------------
   void _onPlayerScreenChangeReceived(Widget playerView) {
     print("chage screen");
+    this._playerView = AZPlayerPlugin.AzPlayerPlugin().playerView;
     setState(() {
 
     });
