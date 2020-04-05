@@ -131,8 +131,8 @@ class _PlayerScreenExampleState extends State<PlayerScreenExample> {
         .addListenerPlayerInfo(_onPlayerInfoChangeReceived);
 
     AZPlayerPlugin.AzPlayerPlugin().setPlayerView(
-      width: 20,
-      height: 20,
+      width: 100,
+      height: 100,
     );
 
     Future.delayed(Duration(seconds: 12)).then((value){

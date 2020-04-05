@@ -126,8 +126,8 @@ public class SwiftAzPlayerPlugin: NSObject, FlutterPlugin {
             return
         }
         
-        guard let width = argsDict["width"] as? Double,
-        let height = argsDict["height"] as? Double
+        guard let width = (argsDict["width"] as? NSString)?.doubleValue,
+        let height = (argsDict["height"] as? NSString)?.doubleValue
         else{
             result(false)
             return

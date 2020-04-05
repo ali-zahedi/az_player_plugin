@@ -1,3 +1,11 @@
+## 0.2.19
+
+* Fix ios screen size native code cast number
+
+## 0.2.18
+
+* Fix ios screen size
+
 ## 0.2.17
 
 * Upgrade ExoPlayer 2.11.3
