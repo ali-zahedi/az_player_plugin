@@ -80,6 +80,7 @@ abstract class InterfacePlayer {
 
   ObserverList<ListenerPlayerInfoFunction> listenersPlayerInfo;
 
+
   /// ---------------------------------------------------------
   /// Adds a callback to be invoked in case of incoming
   /// Player screen
@@ -88,6 +89,10 @@ abstract class InterfacePlayer {
 
   void removeListenerPlayerScreen(Function(Widget playerView) callback);
 
+
+  void addListenerDettachPlayerView(Function() callback);
+
+  void removeListenerDettachPlayerView(Function() callback);
   /// ---------------------------------------------------------
   /// Adds a callback to be invoked in case of incoming
   /// Player info
