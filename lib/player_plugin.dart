@@ -17,12 +17,13 @@ class AzPlayerPlugin implements InterfacePlayer {
   factory AzPlayerPlugin() {
     return AzPlayerPlugin._instance;
   }
+
   @override
   Widget playerView;
 
   LinkedHashSet<File> _files = new LinkedHashSet<File>();
-  num _width=10;
-  num _height=10;
+  num _width = 10;
+  num _height = 10;
   Timer _timer;
   bool _lastTimeIsPlaying = false;
   InterfaceFile _lastCurrentFile;
@@ -65,12 +66,16 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   @override
-  void setPlayerView({num width = 0, num height = 0, bool isProtectAspectRation = true}) async{
+  void setPlayerView(
+      {num width = 0,
+      num height = 0,
+      bool isProtectAspectRation = true,
+      }) async {
     assert(width != null);
     assert(height != null);
     assert(isProtectAspectRation != null);
 
-    if(width == this._width && height == this._height){
+    if (width == this._width && height == this._height) {
       return;
     }
 
@@ -133,7 +138,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> addFileToPlayList(InterfaceFile file) async {
     final bool result =
-    await _channel.invokeMethod('addFileToPlayList', file.toJson());
+        await _channel.invokeMethod('addFileToPlayList', file.toJson());
     this._files.add(file);
     return result;
   }
@@ -146,7 +151,7 @@ class AzPlayerPlugin implements InterfacePlayer {
       this._files.add(elem);
     });
     final bool result =
-    await _channel.invokeMethod('addFilesToPlayList', filesJson);
+        await _channel.invokeMethod('addFilesToPlayList', filesJson);
     return result;
   }
 
@@ -189,8 +194,9 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> playWithFile(InterfaceFile file) async {
     this._files.add(file);
+    await this._detachPlayerView();
     final bool result =
-    await _channel.invokeMethod('playWithFile', file.toJson());
+        await _channel.invokeMethod('playWithFile', file.toJson());
     return result;
   }
 
@@ -203,7 +209,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> removeFromPlayList(InterfaceFile file) async {
     final bool result =
-    await _channel.invokeMethod('removeFromPlayList', file.toJson());
+        await _channel.invokeMethod('removeFromPlayList', file.toJson());
     this._files.removeWhere((value) => value.pk == file.pk);
     return result;
   }
@@ -217,7 +223,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> setRepeatMode(PlayMode mode) async {
     final bool result =
-    await _channel.invokeMethod('setRepeatMode', mode.toString());
+        await _channel.invokeMethod('setRepeatMode', mode.toString());
     return result;
   }
 
@@ -236,7 +242,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> setImagePlaceHolder(String path) async {
     final bool result =
-    await _channel.invokeMethod('setImagePlaceHolder', path);
+        await _channel.invokeMethod('setImagePlaceHolder', path);
     return result;
   }
 
@@ -253,11 +259,15 @@ class AzPlayerPlugin implements InterfacePlayer {
   ///
   @override
   ObserverList<Function(Widget playerView)> listenersPlayerScreen =
-  new ObserverList<Function(Widget playerView)>();
+      new ObserverList<Function(Widget playerView)>();
 
   @override
   ObserverList<ListenerPlayerInfoFunction> listenersPlayerInfo =
-  new ObserverList<ListenerPlayerInfoFunction>();
+      new ObserverList<ListenerPlayerInfoFunction>();
+
+  @override
+  ObserverList<Function()> listenersDetachPlayerView =
+  new ObserverList<Function()>();
 
   /// ---------------------------------------------------------
   /// Adds a callback to be invoked in case of incoming
@@ -266,6 +276,11 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   void addListenerPlayerScreen(Function(Widget playerView) callback) {
     this.listenersPlayerScreen.add(callback);
+  }
+
+  @override
+  void addListenerDetachPlayerView(Function() callback) {
+    this.listenersDetachPlayerView.add(callback);
   }
 
   @override
@@ -292,20 +307,30 @@ class AzPlayerPlugin implements InterfacePlayer {
   /// a trigger
   /// ----------------------------------------------------------
   void _onReceptionOfTriggerPlayerScreen(Widget playerView) {
-    this
-        .listenersPlayerScreen
-        .forEach((Function(Widget playerView) callback) {
+    this.listenersPlayerScreen.forEach((Function(Widget playerView) callback) {
       callback(playerView);
     });
   }
 
+  @override
+  void removeListenerDetachPlayerView(Function() callback) {
+    this.listenersDetachPlayerView.remove(callback);
+  }
+
+  Future<void> _detachPlayerView() {
+    this.listenersDetachPlayerView.forEach((Function() callback) async {
+      await callback();
+    });
+    return Future.value();
+  }
+
   void _onReceptionOfTriggerPlayerInfo(
-      InterfaceFile currentFile,
-      bool isPlaying,
-      num duration,
-      num secondsLeft,
-      num currentTime,
-      ) {
+    InterfaceFile currentFile,
+    bool isPlaying,
+    num duration,
+    num secondsLeft,
+    num currentTime,
+  ) {
     this.listenersPlayerInfo.forEach((ListenerPlayerInfoFunction callback) {
       callback(
         currentFile,
@@ -337,11 +362,13 @@ class AzPlayerPlugin implements InterfacePlayer {
           currentTime,
         );
 
-        if(_lastCurrentFile != currentFile){
+        if (_lastCurrentFile != currentFile) {
           this._lastCurrentFile = currentFile;
           this._onReceptionOfTriggerPlayerScreen(this.playerView);
         }
       }
     });
   }
+
+
 }

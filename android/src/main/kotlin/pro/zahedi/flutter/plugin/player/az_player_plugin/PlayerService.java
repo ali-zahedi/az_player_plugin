@@ -123,6 +123,7 @@ public class PlayerService {
             if (imageView == null) {
                 imageView = new ImageView(context);
                 imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                playerView.addView(imageView);
             }
             Drawable d = null;
             try {
@@ -134,17 +135,21 @@ public class PlayerService {
             RequestOptions option = new RequestOptions().placeholder(d).error(d);
             String imagePath = currentFile == null ? "" : currentFile.image;
             Glide.with(context).setDefaultRequestOptions(option).load(imagePath).into(imageView);
+
+            imageView.setVisibility(View.VISIBLE);
+            if (surfaceView !=null) surfaceView.setVisibility(View.GONE);
 //            imageView.setLayoutParams(params);
-            playerView.removeAllViews();
-            playerView.addView(imageView);
+//            playerView.removeAllViews();
         } else {
             if (surfaceView == null) {
                 surfaceView = new SurfaceView(context);
                 this.player.setVideoSurfaceView(surfaceView);
+                playerView.addView(surfaceView);
             }
+            surfaceView.setVisibility(View.VISIBLE);
+            if (imageView !=null) imageView.setVisibility(View.GONE);
 //            surfaceView.setLayoutParams(params);
-            playerView.removeAllViews();
-            playerView.addView(surfaceView);
+//            playerView.removeAllViews();
         }
 //        FrameLayout.LayoutParams viewParams = new FrameLayout.LayoutParams((int) width, (int) height);
 //        playerView.setLayoutParams(params);
