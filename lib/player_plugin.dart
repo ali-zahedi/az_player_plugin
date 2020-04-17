@@ -79,8 +79,6 @@ class AzPlayerPlugin implements InterfacePlayer {
       return;
     }
 
-    await this._dettachPlayerView();
-
     this._width = width;
     this._height = height;
 
@@ -323,7 +321,7 @@ class AzPlayerPlugin implements InterfacePlayer {
     this.listenersDettachPlayerView.forEach((Function() callback) async {
       await callback();
     });
-    return Future.delayed(Duration(milliseconds: 500));
+    return Future.value();
   }
 
   void _onReceptionOfTriggerPlayerInfo(
