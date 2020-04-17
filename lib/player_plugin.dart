@@ -79,6 +79,8 @@ class AzPlayerPlugin implements InterfacePlayer {
       return;
     }
 
+    await this._dettachPlayerView();
+
     this._width = width;
     this._height = height;
 
