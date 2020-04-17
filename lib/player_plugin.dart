@@ -196,7 +196,7 @@ class AzPlayerPlugin implements InterfacePlayer {
   @override
   Future<bool> playWithFile(InterfaceFile file) async {
     this._files.add(file);
-    await _dettachPlayerView();
+    await this._dettachPlayerView();
     final bool result =
         await _channel.invokeMethod('playWithFile', file.toJson());
     return result;
@@ -320,10 +320,10 @@ class AzPlayerPlugin implements InterfacePlayer {
   }
 
   Future<void> _dettachPlayerView() {
-    this.listenersDettachPlayerView.forEach((Function() callback) {
-      callback();
+    this.listenersDettachPlayerView.forEach((Function() callback) async {
+      await callback();
     });
-    return Future.value(true);
+    return Future.delayed(Duration(milliseconds: 500));
   }
 
   void _onReceptionOfTriggerPlayerInfo(
